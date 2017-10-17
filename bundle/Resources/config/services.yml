@@ -1,0 +1,17 @@
+services:
+    netgen_block_manager.collection.query_type.handler.ezcontent_tags:
+        class: Netgen\Layouts\TagsQuery\Handler\TagsQueryHandler
+        public: false
+        # Needs to be lazy since we're injecting "languages" dynamic param
+        lazy: true
+        arguments:
+            - "@ezpublish.api.service.location"
+            - "@ezpublish.api.service.content"
+            - "@ezpublish.api.service.search"
+            - "@ezpublish.spi.persistence.content_type_handler"
+            - "@ezpublish.translation_helper"
+            - "@netgen_block_manager.ezpublish.content_provider"
+        calls:
+            - [setLanguages, ["$languages$"]]
+        tags:
+            - { name: netgen_block_manager.collection.query_type_handler, type: ezcontent_tags }

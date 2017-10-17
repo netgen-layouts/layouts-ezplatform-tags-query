@@ -1,0 +1,30 @@
+{
+    "name": "netgen/netgenlayoutstagsquery",
+    "description": "Netgen Layouts Tags query",
+    "authors": [
+        {
+            "name": "Netgen",
+            "homepage": "https://www.netgenlabs.com"
+        }
+    ],
+    "require": {
+        "netgen/block-manager-ezpublish": ">=0.7,<1.0",
+        "netgen/tagsbundle": "~3.0"
+    },
+    "repositories": [
+        { "type": "composer", "url": "https://packagist.netgen.biz" }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Netgen\\Layouts\\TagsQuery\\": "lib/",
+            "Netgen\\Bundle\\LayoutsTagsQueryBundle\\": "bundle/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
+    }
+}
