@@ -1,5 +1,5 @@
 {
-    "name": "netgen/netgenlayoutstagsquery",
+    "name": "netgen/layouts-tags-query",
     "description": "Netgen Layouts Tags query",
     "authors": [
         {
@@ -9,7 +9,7 @@
     ],
     "require": {
         "netgen/block-manager-ezpublish": ">=0.7,<1.0",
-        "netgen/tagsbundle": "~3.0"
+        "netgen/tagsbundle": "^2.0|^3.0"
     },
     "repositories": [
         { "type": "composer", "url": "https://packagist.netgen.biz" }
