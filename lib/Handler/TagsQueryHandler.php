@@ -152,7 +152,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             'use_tags_from_current_content',
             ParameterType\Compound\BooleanType::class,
             array(
-                'groups' => array(self::GROUP_ADVANCED),
+                'groups' => $this->advancedGroups,
             )
         );
 
@@ -160,8 +160,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             'field_definition_identifier',
             ParameterType\TextLineType::class,
             array(
-                'default_value' => 'Text',
-                'groups' => array(self::GROUP_ADVANCED),
+                'groups' => $this->advancedGroups,
             )
         );
 
@@ -171,10 +170,10 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             array(
                 'required' => true,
                 'options' => array(
-                    'Match any tags' => 'or_logic',
-                    'Match all tags' => 'and_logic',
+                    'Match any tags' => 'any',
+                    'Match all tags' => 'all',
                 ),
-                'groups' => array(self::GROUP_ADVANCED),
+                'groups' => $this->advancedGroups,
             )
         );
 
@@ -212,7 +211,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                     'List' => 'list',
                     'Tree' => 'tree',
                 ),
-                'groups' => array(self::GROUP_ADVANCED),
+                'groups' => $this->advancedGroups,
             )
         );
 
@@ -446,7 +445,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                 $tagIds
             );
 
-            if ($tagsLogic == 'or_logic') {
+            if ($tagsLogic == 'any') {
                 $tagsCriteria = new Criterion\LogicalOr($tagCriterions);
             } else {
                 $tagsCriteria = new Criterion\LogicalAnd($tagCriterions);
