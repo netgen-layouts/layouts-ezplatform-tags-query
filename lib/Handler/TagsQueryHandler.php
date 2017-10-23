@@ -434,24 +434,20 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             );
         }
 
-        if (count($tagIds) === 1) {
-            $criteria[] = new TagId($tagIds[0]);
+        $tagCriterions = array_map(
+            function ($tagId) {
+                return new TagId($tagId);
+            },
+            $tagIds
+        );
+
+        if ($tagsLogic === 'any') {
+            $tagsCriteria = new Criterion\LogicalOr($tagCriterions);
         } else {
-            $tagCriterions = array_map(
-                function ($tagId) {
-                    return new TagId($tagId);
-                },
-                $tagIds
-            );
-
-            if ($tagsLogic === 'any') {
-                $tagsCriteria = new Criterion\LogicalOr($tagCriterions);
-            } else {
-                $tagsCriteria = new Criterion\LogicalAnd($tagCriterions);
-            }
-
-            $criteria[] = $tagsCriteria;
+            $tagsCriteria = new Criterion\LogicalAnd($tagCriterions);
         }
+
+        $criteria[] = $tagsCriteria;
 
         if ($query->getParameter('only_main_locations')->getValue()) {
             $criteria[] = new Criterion\Location\IsMainLocation(
