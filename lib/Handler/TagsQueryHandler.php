@@ -13,9 +13,6 @@ use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Query\SortClause;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
-use Netgen\TagsBundle\API\Repository\Values\Content\Query\Criterion\TagId;
-use Netgen\TagsBundle\API\Repository\Values\Tags\Tag;
-use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
 use eZ\Publish\Core\Helper\TranslationHelper;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler;
 use Netgen\BlockManager\API\Values\Collection\Query;
@@ -25,6 +22,9 @@ use Netgen\BlockManager\Ez\Parameters\ParameterType as EzParameterType;
 use Netgen\BlockManager\Parameters\ParameterBuilderInterface;
 use Netgen\BlockManager\Parameters\ParameterType;
 use Netgen\BlockManager\Version;
+use Netgen\TagsBundle\API\Repository\Values\Content\Query\Criterion\TagId;
+use Netgen\TagsBundle\API\Repository\Values\Tags\Tag;
+use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
 
 /**
  * Query handler implementation providing values through eZ Platform Tags field.
@@ -397,7 +397,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         if (!$query->getParameter('use_tags_from_current_content')->isEmpty()) {
             $tags = array_merge($tags, $this->getTagsFromContent($query));
-
         }
 
         return array_unique($tags);
@@ -437,7 +436,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         if (count($tagIds) === 1) {
             $criteria[] = new TagId($tagIds[0]);
         } else {
-
             $tagCriterions = array_map(
                 function ($tagId) {
                     return new TagId($tagId);
@@ -445,7 +443,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                 $tagIds
             );
 
-            if ($tagsLogic == 'any') {
+            if ($tagsLogic === 'any') {
                 $tagsCriteria = new Criterion\LogicalOr($tagCriterions);
             } else {
                 $tagsCriteria = new Criterion\LogicalAnd($tagCriterions);
@@ -503,7 +501,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $fieldDefinitionIdentifiers = $query->getParameter('field_definition_identifier')->getValue();
             $fieldDefinitionIdentifiers = explode(',', $fieldDefinitionIdentifiers);
 
-            foreach($fieldDefinitionIdentifiers as $fieldDefinitionIdentifier) {
+            foreach ($fieldDefinitionIdentifiers as $fieldDefinitionIdentifier) {
                 $tags = array_merge($tags, $this->getTagsFromField($content, trim($fieldDefinitionIdentifier)));
             }
 
@@ -556,7 +554,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         }
 
         return array_map(
-            function(Tag $tag) {
+            function (Tag $tag) {
                 return $tag->id;
             },
             $field->value->tags
