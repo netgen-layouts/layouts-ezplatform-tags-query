@@ -395,7 +395,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $tags = array_values($query->getParameter('filter_by_tags')->getValue());
         }
 
-        if (!$query->getParameter('use_tags_from_current_content')->isEmpty()) {
+        if (!$query->getParameter('use_tags_from_current_content')->isEmpty() === true) {
             $tags = array_merge($tags, $this->getTagsFromContent($query));
         }
 
