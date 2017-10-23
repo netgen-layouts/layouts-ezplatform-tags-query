@@ -14,6 +14,7 @@ use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Query\SortClause;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\Core\Helper\TranslationHelper;
+use eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler;
 use Netgen\BlockManager\API\Values\Collection\Query;
 use Netgen\BlockManager\Collection\QueryType\QueryTypeHandlerInterface;
@@ -564,8 +565,26 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     private function getTagsFromAllContentFields(Content $content)
     {
         $tags = array();
-        foreach ($content->fields as $fieldDefIdentifier => $value) {
-            $tags = array_merge($tags, $this->getTagsFromField($content, $fieldDefIdentifier));
+
+        $contentType = $this->contentTypeHandler->load($content->contentInfo->contentTypeId);
+
+        $tagFields = array_map(
+            function (FieldDefinition $definition) {
+                if ($definition->fieldType === 'eztags') {
+                    return $definition->identifier;
+                }
+            },
+            $contentType->fieldDefinitions
+        );
+
+        $tagFields = array_filter($tagFields);
+
+        foreach ($content->fields as $field) {
+            if (!in_array($field->fieldDefIdentifier, $tagFields, true)) {
+                continue;
+            }
+
+            $tags = array_merge($tags, $this->getTagsFromField($content, $field->fieldDefIdentifier));
         }
 
         return $tags;
