@@ -10,7 +10,7 @@ block via Tags field type available in any content in eZ Publish CMS.
 Run the following from your installation root to install the package:
 
 ```bash
-$ composer require netgen/netgenlayoutstagsquery:^1.0
+$ composer require netgen/layouts-tags-query:^1.0
 ```
 
 ### Activate the bundle in your app kernel
