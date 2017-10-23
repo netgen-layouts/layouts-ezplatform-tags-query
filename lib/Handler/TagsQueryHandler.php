@@ -337,8 +337,8 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     public function isContextual(Query $query)
     {
-        return $query->getParameter('use_current_location')->getValue() === true
-            || $query->getParameter('use_tags_from_current_content')->getValue() === true;
+        return $query->getParameter('use_current_location')->getValue()
+            || $query->getParameter('use_tags_from_current_content')->getValue();
     }
 
     /**
@@ -396,7 +396,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $tags = array_values($query->getParameter('filter_by_tags')->getValue());
         }
 
-        if ($query->getParameter('use_tags_from_current_content')->getValue() === true) {
+        if ($query->getParameter('use_tags_from_current_content')->getValue()) {
             $tags = array_merge($tags, $this->getTagsFromContent($query));
         }
 
@@ -434,20 +434,16 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             );
         }
 
-        $tagCriterions = array_map(
+        $tagsCriteria = array_map(
             function ($tagId) {
                 return new TagId($tagId);
             },
             $tagIds
         );
 
-        if ($tagsLogic === 'any') {
-            $tagsCriteria = new Criterion\LogicalOr($tagCriterions);
-        } else {
-            $tagsCriteria = new Criterion\LogicalAnd($tagCriterions);
-        }
-
-        $criteria[] = $tagsCriteria;
+        $criteria[] = $tagsLogic === 'any' ?
+            new Criterion\LogicalOr($tagsCriteria) :
+            new Criterion\LogicalAnd($tagsCriteria);
 
         if ($query->getParameter('only_main_locations')->getValue()) {
             $criteria[] = new Criterion\Location\IsMainLocation(
