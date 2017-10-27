@@ -32,11 +32,6 @@ use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
 class TagsQueryHandler implements QueryTypeHandlerInterface
 {
     /**
-     * @var int
-     */
-    const DEFAULT_LIMIT = 25;
-
-    /**
      * @var \eZ\Publish\API\Repository\LocationService
      */
     private $locationService;
