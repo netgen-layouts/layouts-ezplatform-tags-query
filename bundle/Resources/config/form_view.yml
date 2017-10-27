@@ -1,8 +1,0 @@
-view:
-    form_view:
-        api:
-            query\full_edit\ezcontent_tags:
-                template: "@NetgenLayoutsTagsQuery/app/form/query/edit/full/ezcontent_tags.html.twig"
-                match:
-                    form\type: Netgen\BlockManager\Collection\Query\Form\FullEditType
-                    form\query\type: ezcontent_tags
