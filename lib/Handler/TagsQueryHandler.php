@@ -22,7 +22,6 @@ use Netgen\BlockManager\Ez\ContentProvider\ContentProviderInterface;
 use Netgen\BlockManager\Ez\Parameters\ParameterType as EzParameterType;
 use Netgen\BlockManager\Parameters\ParameterBuilderInterface;
 use Netgen\BlockManager\Parameters\ParameterType;
-use Netgen\BlockManager\Version;
 use Netgen\TagsBundle\API\Repository\Values\Content\Query\Criterion\TagId;
 use Netgen\TagsBundle\API\Repository\Values\Tags\Tag;
 use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
@@ -94,11 +93,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         Location::SORT_FIELD_CONTENTOBJECT_ID => SortClause\ContentId::class,
     );
 
-    /**
-     * @var array
-     */
-    private $advancedGroups = array();
-
     public function __construct(
         LocationService $locationService,
         ContentService $contentService,
@@ -113,10 +107,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         $this->contentTypeHandler = $contentTypeHandler;
         $this->translationHelper = $translationHelper;
         $this->contentProvider = $contentProvider;
-
-        if (Version::VERSION_ID >= 800) {
-            $this->advancedGroups = array('advanced');
-        }
     }
 
     /**
@@ -153,7 +143,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             'use_tags_from_current_content',
             ParameterType\Compound\BooleanType::class,
             array(
-                'groups' => $this->advancedGroups,
+                'groups' => array(self::GROUP_ADVANCED),
             )
         );
 
@@ -161,7 +151,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             'field_definition_identifier',
             ParameterType\TextLineType::class,
             array(
-                'groups' => $this->advancedGroups,
+                'groups' => array(self::GROUP_ADVANCED),
             )
         );
 
@@ -174,7 +164,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                     'Match any tags' => 'any',
                     'Match all tags' => 'all',
                 ),
-                'groups' => $this->advancedGroups,
+                'groups' => array(self::GROUP_ADVANCED),
             )
         );
 
@@ -212,24 +202,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                     'List' => 'list',
                     'Tree' => 'tree',
                 ),
-                'groups' => $this->advancedGroups,
-            )
-        );
-
-        $builder->add(
-            'limit',
-            ParameterType\IntegerType::class,
-            array(
-                'min' => 0,
-            )
-        );
-
-        $builder->add(
-            'offset',
-            ParameterType\IntegerType::class,
-            array(
-                'min' => 0,
-                'groups' => $this->advancedGroups,
+                'groups' => array(self::GROUP_ADVANCED),
             )
         );
 
@@ -238,7 +211,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             ParameterType\BooleanType::class,
             array(
                 'default_value' => true,
-                'groups' => $this->advancedGroups,
+                'groups' => array(self::GROUP_ADVANCED),
             )
         );
 
@@ -246,7 +219,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             'filter_by_content_type',
             ParameterType\Compound\BooleanType::class,
             array(
-                'groups' => $this->advancedGroups,
+                'groups' => array(self::GROUP_ADVANCED),
             )
         );
 
@@ -255,7 +228,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             EzParameterType\ContentTypeType::class,
             array(
                 'multiple' => true,
-                'groups' => $this->advancedGroups,
+                'groups' => array(self::GROUP_ADVANCED),
             )
         );
 
@@ -268,7 +241,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                     'Include content types' => 'include',
                     'Exclude content types' => 'exclude',
                 ),
-                'groups' => $this->advancedGroups,
+                'groups' => array(self::GROUP_ADVANCED),
             )
         );
     }
@@ -288,7 +261,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         }
 
         $searchResult = $this->searchService->findLocations(
-            $this->buildQuery($parentLocation, $tagIds, $query),
+            $this->buildQuery($parentLocation, $tagIds, $query, false, $offset, $limit),
             array('languages' => $this->languages)
         );
 
@@ -324,17 +297,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         return $searchResult->totalCount;
     }
 
-    public function getInternalLimit(Query $query)
-    {
-        $limit = $query->getParameter('limit')->getValue();
-
-        if (!is_int($limit)) {
-            return self::DEFAULT_LIMIT;
-        }
-
-        return $limit >= 0 ? $limit : self::DEFAULT_LIMIT;
-    }
-
     public function isContextual(Query $query)
     {
         return $query->getParameter('use_current_location')->getValue()
@@ -365,21 +327,35 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     }
 
     /**
-     * Return offset value to use from the given collection $query.
+     * Return filtered offset value to use.
      *
-     * @param \Netgen\BlockManager\API\Values\Collection\Query $query
+     * @param int $offset
      *
      * @return int
      */
-    private function getOffset(Query $query)
+    private function getOffset($offset)
     {
-        $offset = $query->getParameter('offset')->getValue();
-
         if (is_int($offset) && $offset >= 0) {
             return $offset;
         }
 
         return 0;
+    }
+
+    /**
+     * Return filtered limit value to use.
+     *
+     * @param int $limit
+     *
+     * @return int
+     */
+    private function getLimit($limit)
+    {
+        if (is_int($limit) && $limit >= 0) {
+            return $limit;
+        }
+
+        return null;
     }
 
     /**
@@ -410,14 +386,22 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      * @param array $tagIds
      * @param \Netgen\BlockManager\API\Values\Collection\Query $query
      * @param bool $buildCountQuery
+     * @param int $offset
+     * @param int $limit
      *
      * @return LocationQuery
      */
-    private function buildQuery(Location $parentLocation, array $tagIds, Query $query, $buildCountQuery = false)
-    {
+    private function buildQuery(
+        Location $parentLocation,
+        array $tagIds,
+        Query $query,
+        $buildCountQuery = false,
+        $offset = 0,
+        $limit = null
+    ) {
         $locationQuery = new LocationQuery();
-        $internalLimit = $this->getInternalLimit($query);
-        $offset = $this->getOffset($query);
+        $offset = $this->getOffset($offset);
+        $limit = $this->getLimit($limit);
         $sortType = $query->getParameter('sort_type')->getValue() ?: 'default';
         $sortDirection = $query->getParameter('sort_direction')->getValue() ?: LocationQuery::SORT_DESC;
 
@@ -471,7 +455,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         $locationQuery->limit = 0;
         if (!$buildCountQuery) {
             $locationQuery->offset = $offset;
-            $locationQuery->limit = $internalLimit;
+            $locationQuery->limit = $limit;
         }
 
         $locationQuery->sortClauses = array(
