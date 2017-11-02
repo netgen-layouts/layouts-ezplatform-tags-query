@@ -28,6 +28,8 @@ use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
 
 /**
  * Query handler implementation providing values through eZ Platform Tags field.
+ *
+ * @final
  */
 class TagsQueryHandler implements QueryTypeHandlerInterface
 {
