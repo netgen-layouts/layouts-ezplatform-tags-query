@@ -128,12 +128,18 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $builder->get('use_current_location')->add(
             'parent_location_id',
-            EzParameterType\LocationType::class
+            EzParameterType\LocationType::class,
+            array(
+                'allow_invalid' => true,
+            )
         );
 
         $builder->add(
             'filter_by_tags',
-            EzParameterType\TagsType::class
+            EzParameterType\TagsType::class,
+            array(
+                'allow_invalid' => true,
+            )
         );
 
         $builder->add(
