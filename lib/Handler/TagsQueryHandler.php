@@ -2,22 +2,23 @@
 
 namespace Netgen\Layouts\TagsQuery\Handler;
 
-use Exception;
-use eZ\Publish\API\Repository\ContentService;
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\LocationService;
 use eZ\Publish\API\Repository\SearchService;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
-use eZ\Publish\API\Repository\Values\Content\Query\SortClause;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\Core\Helper\TranslationHelper;
 use eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler;
 use Netgen\BlockManager\API\Values\Collection\Query;
 use Netgen\BlockManager\Collection\QueryType\QueryTypeHandlerInterface;
+use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\ContentTypeFilterTrait;
+use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\MainLocationFilterTrait;
+use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\ParentLocationTrait;
+use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\QueryTypeFilterTrait;
+use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\SortTrait;
 use Netgen\BlockManager\Ez\ContentProvider\ContentProviderInterface;
 use Netgen\BlockManager\Ez\Parameters\ParameterType as EzParameterType;
 use Netgen\BlockManager\Parameters\ParameterBuilderInterface;
@@ -33,15 +34,11 @@ use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
  */
 class TagsQueryHandler implements QueryTypeHandlerInterface
 {
-    /**
-     * @var \eZ\Publish\API\Repository\LocationService
-     */
-    private $locationService;
-
-    /**
-     * @var \eZ\Publish\API\Repository\ContentService
-     */
-    private $contentService;
+    use ParentLocationTrait;
+    use ContentTypeFilterTrait;
+    use MainLocationFilterTrait;
+    use QueryTypeFilterTrait;
+    use SortTrait;
 
     /**
      * @var \eZ\Publish\API\Repository\SearchService
@@ -59,51 +56,25 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     private $translationHelper;
 
     /**
-     * @var \Netgen\BlockManager\Ez\ContentProvider\ContentProviderInterface
-     */
-    private $contentProvider;
-
-    /**
      * Injected list of prioritized languages.
      *
      * @var array
      */
     private $languages = array();
 
-    /**
-     * @var array
-     */
-    private $sortClauses = array(
-        'default' => SortClause\DatePublished::class,
-        'date_published' => SortClause\DatePublished::class,
-        'date_modified' => SortClause\DateModified::class,
-        'content_name' => SortClause\ContentName::class,
-        'location_priority' => SortClause\Location\Priority::class,
-        Location::SORT_FIELD_PATH => SortClause\Location\Path::class,
-        Location::SORT_FIELD_PUBLISHED => SortClause\DatePublished::class,
-        Location::SORT_FIELD_MODIFIED => SortClause\DateModified::class,
-        Location::SORT_FIELD_SECTION => SortClause\SectionIdentifier::class,
-        Location::SORT_FIELD_DEPTH => SortClause\Location\Depth::class,
-        Location::SORT_FIELD_PRIORITY => SortClause\Location\Priority::class,
-        Location::SORT_FIELD_NAME => SortClause\ContentName::class,
-        Location::SORT_FIELD_NODE_ID => SortClause\Location\Id::class,
-        Location::SORT_FIELD_CONTENTOBJECT_ID => SortClause\ContentId::class,
-    );
-
     public function __construct(
         LocationService $locationService,
-        ContentService $contentService,
         SearchService $searchService,
         Handler $contentTypeHandler,
         TranslationHelper $translationHelper,
         ContentProviderInterface $contentProvider
     ) {
-        $this->locationService = $locationService;
-        $this->contentService = $contentService;
         $this->searchService = $searchService;
-        $this->contentTypeHandler = $contentTypeHandler;
         $this->translationHelper = $translationHelper;
-        $this->contentProvider = $contentProvider;
+
+        $this->setLocationService($locationService);
+        $this->setContentTypeHandler($contentTypeHandler);
+        $this->setContentProvider($contentProvider);
     }
 
     /**
@@ -118,21 +89,9 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     public function buildParameters(ParameterBuilderInterface $builder)
     {
-        $builder->add(
-            'use_current_location',
-            ParameterType\Compound\BooleanType::class,
-            array(
-                'reverse' => true,
-            )
-        );
+        $advancedGroup = array(self::GROUP_ADVANCED);
 
-        $builder->get('use_current_location')->add(
-            'parent_location_id',
-            EzParameterType\LocationType::class,
-            array(
-                'allow_invalid' => true,
-            )
-        );
+        $this->buildParentLocationParameters($builder);
 
         $builder->add(
             'filter_by_tags',
@@ -146,7 +105,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             'use_tags_from_current_content',
             ParameterType\Compound\BooleanType::class,
             array(
-                'groups' => array(self::GROUP_ADVANCED),
+                'groups' => $advancedGroup,
             )
         );
 
@@ -154,7 +113,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             'field_definition_identifier',
             ParameterType\TextLineType::class,
             array(
-                'groups' => array(self::GROUP_ADVANCED),
+                'groups' => $advancedGroup,
             )
         );
 
@@ -167,86 +126,15 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                     'Match any tags' => 'any',
                     'Match all tags' => 'all',
                 ),
-                'groups' => array(self::GROUP_ADVANCED),
+                'groups' => $advancedGroup,
             )
         );
 
-        $builder->add(
-            'sort_type',
-            ParameterType\ChoiceType::class,
-            array(
-                'required' => true,
-                'options' => array(
-                    'Published' => 'date_published',
-                    'Modified' => 'date_modified',
-                    'Alphabetical' => 'content_name',
-                ),
-            )
-        );
+        $this->buildSortParameters($builder, array(), array('date_published', 'date_modified', 'content_name'));
 
-        $builder->add(
-            'sort_direction',
-            ParameterType\ChoiceType::class,
-            array(
-                'required' => true,
-                'options' => array(
-                    'Descending' => LocationQuery::SORT_DESC,
-                    'Ascending' => LocationQuery::SORT_ASC,
-                ),
-            )
-        );
-
-        $builder->add(
-            'query_type',
-            ParameterType\ChoiceType::class,
-            array(
-                'required' => true,
-                'options' => array(
-                    'List' => 'list',
-                    'Tree' => 'tree',
-                ),
-                'groups' => array(self::GROUP_ADVANCED),
-            )
-        );
-
-        $builder->add(
-            'only_main_locations',
-            ParameterType\BooleanType::class,
-            array(
-                'default_value' => true,
-                'groups' => array(self::GROUP_ADVANCED),
-            )
-        );
-
-        $builder->add(
-            'filter_by_content_type',
-            ParameterType\Compound\BooleanType::class,
-            array(
-                'groups' => array(self::GROUP_ADVANCED),
-            )
-        );
-
-        $builder->get('filter_by_content_type')->add(
-            'content_types',
-            EzParameterType\ContentTypeType::class,
-            array(
-                'multiple' => true,
-                'groups' => array(self::GROUP_ADVANCED),
-            )
-        );
-
-        $builder->get('filter_by_content_type')->add(
-            'content_types_filter',
-            ParameterType\ChoiceType::class,
-            array(
-                'required' => true,
-                'options' => array(
-                    'Include content types' => 'include',
-                    'Exclude content types' => 'exclude',
-                ),
-                'groups' => array(self::GROUP_ADVANCED),
-            )
-        );
+        $this->buildQueryTypeParameters($builder, $advancedGroup);
+        $this->buildMainLocationParameters($builder, $advancedGroup);
+        $this->buildContentTypeFilterParameters($builder, $advancedGroup);
     }
 
     public function getValues(Query $query, $offset = 0, $limit = null)
@@ -263,8 +151,12 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             return array();
         }
 
+        $locationQuery = $this->buildQuery($query, $parentLocation, $tagIds);
+        $locationQuery->offset = $this->getOffset($offset);
+        $locationQuery->limit = $this->getLimit($limit);
+
         $searchResult = $this->searchService->findLocations(
-            $this->buildQuery($parentLocation, $tagIds, $query, false, $offset, $limit),
+            $locationQuery,
             array('languages' => $this->languages)
         );
 
@@ -292,8 +184,11 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             return 0;
         }
 
+        $locationQuery = $this->buildQuery($query, $parentLocation, $tagIds);
+        $locationQuery->limit = 0;
+
         $searchResult = $this->searchService->findLocations(
-            $this->buildQuery($parentLocation, $tagIds, $query, true),
+            $locationQuery,
             array('languages' => $this->languages)
         );
 
@@ -304,29 +199,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     {
         return $query->getParameter('use_current_location')->getValue()
             || $query->getParameter('use_tags_from_current_content')->getValue();
-    }
-
-    /**
-     * Returns content type IDs for all existing content types.
-     *
-     * @param array $contentTypeIdentifiers
-     *
-     * @return array
-     */
-    private function getContentTypeIds(array $contentTypeIdentifiers)
-    {
-        $idList = array();
-
-        foreach ($contentTypeIdentifiers as $identifier) {
-            try {
-                $contentType = $this->contentTypeHandler->loadByIdentifier($identifier);
-                $idList[] = $contentType->id;
-            } catch (NotFoundException $e) {
-                continue;
-            }
-        }
-
-        return $idList;
     }
 
     /**
@@ -385,41 +257,15 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     /**
      * Builds the Location query from given parameters.
      *
+     * @param \Netgen\BlockManager\API\Values\Collection\Query $query
      * @param Location $parentLocation
      * @param array $tagIds
-     * @param \Netgen\BlockManager\API\Values\Collection\Query $query
-     * @param bool $buildCountQuery
-     * @param int $offset
-     * @param int $limit
      *
      * @return LocationQuery
      */
-    private function buildQuery(
-        Location $parentLocation,
-        array $tagIds,
-        Query $query,
-        $buildCountQuery = false,
-        $offset = 0,
-        $limit = null
-    ) {
+    private function buildQuery(Query $query, Location $parentLocation, array $tagIds)
+    {
         $locationQuery = new LocationQuery();
-        $offset = $this->getOffset($offset);
-        $limit = $this->getLimit($limit);
-        $sortType = $query->getParameter('sort_type')->getValue() ?: 'default';
-        $sortDirection = $query->getParameter('sort_direction')->getValue() ?: LocationQuery::SORT_DESC;
-
-        $tagsLogic = $query->getParameter('tags_filter_logic')->getValue();
-
-        $criteria = array(
-            new Criterion\Subtree($parentLocation->pathString),
-            new Criterion\Visibility(Criterion\Visibility::VISIBLE),
-        );
-
-        if ($query->getParameter('query_type')->getValue() === 'list') {
-            $criteria[] = new Criterion\Location\Depth(
-                Criterion\Operator::EQ, $parentLocation->depth + 1
-            );
-        }
 
         $tagsCriteria = array_map(
             function ($tagId) {
@@ -428,42 +274,21 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $tagIds
         );
 
-        $criteria[] = $tagsLogic === 'any' ?
+        $tagsCriteria = $query->getParameter('tags_filter_logic')->getValue() === 'any' ?
             new Criterion\LogicalOr($tagsCriteria) :
             new Criterion\LogicalAnd($tagsCriteria);
 
-        if ($query->getParameter('only_main_locations')->getValue()) {
-            $criteria[] = new Criterion\Location\IsMainLocation(
-                Criterion\Location\IsMainLocation::MAIN
-            );
-        }
-
-        if ($query->getParameter('filter_by_content_type')->getValue()) {
-            $contentTypes = $query->getParameter('content_types')->getValue();
-            if (!empty($contentTypes)) {
-                $contentTypeFilter = new Criterion\ContentTypeId(
-                    $this->getContentTypeIds($contentTypes)
-                );
-
-                if ($query->getParameter('content_types_filter')->getValue() === 'exclude') {
-                    $contentTypeFilter = new Criterion\LogicalNot($contentTypeFilter);
-                }
-
-                $criteria[] = $contentTypeFilter;
-            }
-        }
-
-        $locationQuery->filter = new Criterion\LogicalAnd($criteria);
-
-        $locationQuery->limit = 0;
-        if (!$buildCountQuery) {
-            $locationQuery->offset = $offset;
-            $locationQuery->limit = $limit;
-        }
-
-        $locationQuery->sortClauses = array(
-            new $this->sortClauses[$sortType]($sortDirection),
+        $criteria = array(
+            new Criterion\Subtree($parentLocation->pathString),
+            new Criterion\Visibility(Criterion\Visibility::VISIBLE),
+            $this->getQueryTypeFilterCriteria($query, $parentLocation),
+            $tagsCriteria,
+            $this->getMainLocationFilterCriteria($query),
+            $this->getContentTypeFilterCriteria($query)
         );
+
+        $locationQuery->filter = new Criterion\LogicalAnd(array_filter($criteria));
+        $locationQuery->sortClauses = $this->getSortClauses($query, $parentLocation);
 
         return $locationQuery;
     }
@@ -489,33 +314,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         }
 
         return array_merge($tags, $this->getTagsFromAllContentFields($content));
-    }
-
-    /**
-     * Returns the parent location to use for the query.
-     *
-     * @param \Netgen\BlockManager\API\Values\Collection\Query $query
-     *
-     * @return \eZ\Publish\API\Repository\Values\Content\Location|null
-     */
-    private function getParentLocation(Query $query)
-    {
-        if ($query->getParameter('use_current_location')->getValue()) {
-            return $this->contentProvider->provideLocation();
-        }
-
-        $parentLocationId = $query->getParameter('parent_location_id')->getValue();
-        if (empty($parentLocationId)) {
-            return null;
-        }
-
-        try {
-            $parentLocation = $this->locationService->loadLocation($parentLocationId);
-
-            return $parentLocation->invisible ? null : $parentLocation;
-        } catch (Exception $e) {
-            return null;
-        }
     }
 
     private function getTagsFromField(Content $content, $fieldDefinitionIdentifier)

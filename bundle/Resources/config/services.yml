@@ -6,7 +6,6 @@ services:
         lazy: true
         arguments:
             - "@ezpublish.api.service.location"
-            - "@ezpublish.api.service.content"
             - "@ezpublish.api.service.search"
             - "@ezpublish.spi.persistence.content_type_handler"
             - "@ezpublish.translation_helper"
