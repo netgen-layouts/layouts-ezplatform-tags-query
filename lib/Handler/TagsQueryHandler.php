@@ -265,8 +265,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     private function buildQuery(Query $query, Location $parentLocation, array $tagIds)
     {
-        $locationQuery = new LocationQuery();
-
         $tagsCriteria = array_map(
             function ($tagId) {
                 return new TagId($tagId);
@@ -287,6 +285,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $this->getContentTypeFilterCriteria($query)
         );
 
+        $locationQuery = new LocationQuery();
         $locationQuery->filter = new Criterion\LogicalAnd(array_filter($criteria));
         $locationQuery->sortClauses = $this->getSortClauses($query, $parentLocation);
 
