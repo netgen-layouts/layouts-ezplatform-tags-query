@@ -46,11 +46,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     private $searchService;
 
     /**
-     * @var \eZ\Publish\SPI\Persistence\Content\Type\Handler
-     */
-    private $contentTypeHandler;
-
-    /**
      * @var \eZ\Publish\Core\Helper\TranslationHelper
      */
     private $translationHelper;
