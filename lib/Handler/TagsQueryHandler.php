@@ -151,7 +151,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             return array();
         }
 
-        $locationQuery = $this->buildQuery($query, $parentLocation, $tagIds);
+        $locationQuery = $this->buildLocationQuery($query, $parentLocation, $tagIds);
         $locationQuery->offset = $this->getOffset($offset);
         $locationQuery->limit = $this->getLimit($limit);
 
@@ -184,7 +184,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             return 0;
         }
 
-        $locationQuery = $this->buildQuery($query, $parentLocation, $tagIds);
+        $locationQuery = $this->buildLocationQuery($query, $parentLocation, $tagIds);
         $locationQuery->limit = 0;
 
         $searchResult = $this->searchService->findLocations(
@@ -263,7 +263,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      *
      * @return LocationQuery
      */
-    private function buildQuery(Query $query, Location $parentLocation, array $tagIds)
+    private function buildLocationQuery(Query $query, Location $parentLocation, array $tagIds)
     {
         $tagsCriteria = array_map(
             function ($tagId) {
@@ -282,7 +282,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $this->getQueryTypeFilterCriteria($query, $parentLocation),
             $tagsCriteria,
             $this->getMainLocationFilterCriteria($query),
-            $this->getContentTypeFilterCriteria($query)
+            $this->getContentTypeFilterCriteria($query),
         );
 
         $locationQuery = new LocationQuery();
