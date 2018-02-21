@@ -147,6 +147,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         }
 
         $locationQuery = $this->buildLocationQuery($query, $parentLocation, $tagIds);
+        $locationQuery->performCount = false;
         $locationQuery->offset = $this->getOffset($offset);
         $locationQuery->limit = $this->getLimit($limit);
 
