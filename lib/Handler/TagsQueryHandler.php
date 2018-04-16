@@ -228,8 +228,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         if (is_int($limit) && $limit >= 0) {
             return $limit;
         }
-
-        return null;
     }
 
     /**
