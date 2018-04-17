@@ -55,7 +55,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      *
      * @var array
      */
-    private $languages = array();
+    private $languages = [];
 
     public function __construct(
         LocationService $locationService,
@@ -79,53 +79,53 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     public function setLanguages(array $languages = null)
     {
-        $this->languages = is_array($languages) ? $languages : array();
+        $this->languages = is_array($languages) ? $languages : [];
     }
 
     public function buildParameters(ParameterBuilderInterface $builder)
     {
-        $advancedGroup = array(self::GROUP_ADVANCED);
+        $advancedGroup = [self::GROUP_ADVANCED];
 
         $this->buildParentLocationParameters($builder);
 
         $builder->add(
             'filter_by_tags',
             EzParameterType\TagsType::class,
-            array(
+            [
                 'allow_invalid' => true,
-            )
+            ]
         );
 
         $builder->add(
             'use_tags_from_current_content',
             ParameterType\Compound\BooleanType::class,
-            array(
+            [
                 'groups' => $advancedGroup,
-            )
+            ]
         );
 
         $builder->get('use_tags_from_current_content')->add(
             'field_definition_identifier',
             ParameterType\TextLineType::class,
-            array(
+            [
                 'groups' => $advancedGroup,
-            )
+            ]
         );
 
         $builder->add(
             'tags_filter_logic',
             ParameterType\ChoiceType::class,
-            array(
+            [
                 'required' => true,
-                'options' => array(
+                'options' => [
                     'Match any tags' => 'any',
                     'Match all tags' => 'all',
-                ),
+                ],
                 'groups' => $advancedGroup,
-            )
+            ]
         );
 
-        $this->buildSortParameters($builder, array(), array('date_published', 'date_modified', 'content_name'));
+        $this->buildSortParameters($builder, [], ['date_published', 'date_modified', 'content_name']);
 
         $this->buildQueryTypeParameters($builder, $advancedGroup);
         $this->buildMainLocationParameters($builder, $advancedGroup);
@@ -137,13 +137,13 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         $parentLocation = $this->getParentLocation($query);
 
         if (!$parentLocation instanceof Location) {
-            return array();
+            return [];
         }
 
         $tagIds = $this->getTagIds($query);
 
         if (count($tagIds) === 0) {
-            return array();
+            return [];
         }
 
         $locationQuery = $this->buildLocationQuery($query, $parentLocation, $tagIds);
@@ -156,7 +156,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $searchResult = $this->searchService->findLocations(
             $locationQuery,
-            array('languages' => $this->languages)
+            ['languages' => $this->languages]
         );
 
         $locations = array_map(
@@ -188,7 +188,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $searchResult = $this->searchService->findLocations(
             $locationQuery,
-            array('languages' => $this->languages)
+            ['languages' => $this->languages]
         );
 
         return $searchResult->totalCount;
@@ -239,7 +239,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     private function getTagIds(Query $query)
     {
-        $tags = array();
+        $tags = [];
         if (!$query->getParameter('filter_by_tags')->isEmpty()) {
             $tags = array_values($query->getParameter('filter_by_tags')->getValue());
         }
@@ -273,14 +273,14 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             new Criterion\LogicalOr($tagsCriteria) :
             new Criterion\LogicalAnd($tagsCriteria);
 
-        $criteria = array(
+        $criteria = [
             new Criterion\Subtree($parentLocation->pathString),
             new Criterion\Visibility(Criterion\Visibility::VISIBLE),
             $this->getQueryTypeFilterCriteria($query, $parentLocation),
             $tagsCriteria,
             $this->getMainLocationFilterCriteria($query),
             $this->getContentTypeFilterCriteria($query),
-        );
+        ];
 
         $locationQuery = new LocationQuery();
         $locationQuery->filter = new Criterion\LogicalAnd(array_filter($criteria));
@@ -294,10 +294,10 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         $content = $this->contentProvider->provideContent();
 
         if ($content === null) {
-            return array();
+            return [];
         }
 
-        $tags = array();
+        $tags = [];
         if (!$query->getParameter('field_definition_identifier')->isEmpty()) {
             $fieldDefinitionIdentifiers = $query->getParameter('field_definition_identifier')->getValue();
             $fieldDefinitionIdentifiers = explode(',', $fieldDefinitionIdentifiers);
@@ -315,7 +315,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     private function getTagsFromField(Content $content, $fieldDefinitionIdentifier)
     {
         if (!array_key_exists($fieldDefinitionIdentifier, $content->fields)) {
-            return array();
+            return [];
         }
 
         $field = $this->translationHelper->getTranslatedField(
@@ -324,7 +324,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         );
 
         if ($field === null || !$field->value instanceof TagsFieldValue) {
-            return array();
+            return [];
         }
 
         return array_map(
@@ -337,7 +337,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     private function getTagsFromAllContentFields(Content $content)
     {
-        $tags = array();
+        $tags = [];
 
         $contentType = $this->contentTypeHandler->load($content->contentInfo->contentTypeId);
 

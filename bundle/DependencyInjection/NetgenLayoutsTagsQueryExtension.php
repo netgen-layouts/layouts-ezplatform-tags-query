@@ -24,9 +24,9 @@ final class NetgenLayoutsTagsQueryExtension extends Extension implements Prepend
 
     public function prepend(ContainerBuilder $container)
     {
-        $prependConfigs = array(
+        $prependConfigs = [
             'query_types.yml' => 'netgen_block_manager',
-        );
+        ];
 
         foreach ($prependConfigs as $configFile => $prependConfig) {
             $configFile = __DIR__ . '/../Resources/config/' . $configFile;
