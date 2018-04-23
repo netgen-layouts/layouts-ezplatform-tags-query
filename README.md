@@ -18,13 +18,13 @@ $ composer require netgen/layouts-tags-query:^1.0
 Add the following to the list of activated bundles:
 
 ```php
-$bundles = array(
+$bundles = [
 ...
 
 new Netgen\Bundle\LayoutsTagsQueryBundle\NetgenLayoutsTagsQueryBundle(),
 
 ...
-);
+];
 ```
 
 Due to how prepending configuration of other bundles works in Symfony, to make
