@@ -1,6 +1,7 @@
 {
     "name": "netgen/layouts-tags-query",
     "description": "Netgen Layouts tags query",
+    "license": "proprietary",
     "authors": [
         {
             "name": "Netgen",
