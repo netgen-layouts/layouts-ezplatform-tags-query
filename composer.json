@@ -9,8 +9,8 @@
         }
     ],
     "require": {
-        "netgen/block-manager-ezpublish": ">=0.10,<1.0",
-        "netgen/tagsbundle": "^2.0|^3.0"
+        "netgen/block-manager-ezpublish": ">=0.10, <1.0",
+        "netgen/tagsbundle": "^2.0 || ^3.0"
     },
     "repositories": [
         { "type": "composer", "url": "https://packagist.netgen.biz" }
