@@ -26,6 +26,7 @@ use Netgen\BlockManager\Parameters\ParameterType;
 use Netgen\TagsBundle\API\Repository\Values\Content\Query\Criterion\TagId;
 use Netgen\TagsBundle\API\Repository\Values\Tags\Tag;
 use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Query handler implementation providing values through eZ Platform Tags field.
@@ -57,15 +58,22 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     private $languages = [];
 
+    /**
+     * @var \Symfony\Component\HttpFoundation\RequestStack
+     */
+    private $requestStack;
+
     public function __construct(
         LocationService $locationService,
         SearchService $searchService,
         Handler $contentTypeHandler,
         TranslationHelper $translationHelper,
-        ContentProviderInterface $contentProvider
+        ContentProviderInterface $contentProvider,
+        RequestStack $requestStack
     ) {
         $this->searchService = $searchService;
         $this->translationHelper = $translationHelper;
+        $this->requestStack = $requestStack;
 
         $this->setLocationService($locationService);
         $this->setContentTypeHandler($contentTypeHandler);
@@ -106,6 +114,22 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $builder->get('use_tags_from_current_content')->add(
             'field_definition_identifier',
+            ParameterType\TextLineType::class,
+            [
+                'groups' => $advancedGroup,
+            ]
+        );
+
+        $builder->add(
+            'use_tags_from_url',
+            ParameterType\Compound\BooleanType::class,
+            [
+                'groups' => $advancedGroup,
+            ]
+        );
+
+        $builder->get('use_tags_from_url')->add(
+            'query_string_param_name',
             ParameterType\TextLineType::class,
             [
                 'groups' => $advancedGroup,
@@ -248,6 +272,20 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $tags = array_merge($tags, $this->getTagsFromContent($query));
         }
 
+        if ($query->getParameter('use_tags_from_url')->getValue()) {
+            $request = $this->requestStack->getCurrentRequest();
+            $queryParam = $query->getParameter('query_string_param_name');
+
+            if (!$queryParam->isEmpty() && $request->query->has($queryParam->getValue())) {
+                $value = $request->query->get($queryParam->getValue());
+                if (!is_array($value)) {
+                    $value = [$value];
+                }
+
+                $tags = array_merge($tags, $value);
+            }
+        }
+        
         return array_unique($tags);
     }
 
