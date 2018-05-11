@@ -12,6 +12,12 @@
         "netgen/block-manager-ezpublish": ">=0.10, <1.0",
         "netgen/tagsbundle": "^2.0 || ^3.0"
     },
+    "require-dev": {
+        "phpstan/phpstan": "^0.9"
+    },
+    "scripts": {
+        "phpstan": "@php vendor/bin/phpstan analyse -c phpstan.neon --level=7 --ansi lib bundle"
+    },
     "repositories": [
         { "type": "composer", "url": "https://packagist.netgen.biz" }
     ],
