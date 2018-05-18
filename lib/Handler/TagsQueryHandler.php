@@ -203,7 +203,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     /**
      * Return filtered offset value to use.
      *
-     * @param int $offset
+     * @param int|null $offset
      *
      * @return int
      */
@@ -219,7 +219,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     /**
      * Return filtered limit value to use.
      *
-     * @param int $limit
+     * @param int|null $limit
      *
      * @return int
      */
