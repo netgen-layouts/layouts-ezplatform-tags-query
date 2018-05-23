@@ -26,6 +26,7 @@ use Netgen\BlockManager\Parameters\ParameterType;
 use Netgen\TagsBundle\API\Repository\Values\Content\Query\Criterion\TagId;
 use Netgen\TagsBundle\API\Repository\Values\Tags\Tag;
 use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -272,12 +273,12 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $tags = array_merge($tags, $this->getTagsFromContent($query));
         }
 
-        if ($query->getParameter('use_tags_from_query_string')->getValue()) {
-            $request = $this->requestStack->getCurrentRequest();
-            $queryParam = $query->getParameter('query_string_param_name');
+        $request = $this->requestStack->getCurrentRequest();
+        if ($request instanceof Request && $query->getParameter('use_tags_from_query_string')->getValue()) {
+            $queryStringParam = $query->getParameter('query_string_param_name');
 
-            if (!$queryParam->isEmpty() && $request->query->has($queryParam->getValue())) {
-                $value = $request->query->get($queryParam->getValue());
+            if (!$queryStringParam->isEmpty() && $request->query->has($queryStringParam->getValue())) {
+                $value = $request->query->get($queryStringParam->getValue());
                 if (!is_array($value)) {
                     $value = [$value];
                 }
