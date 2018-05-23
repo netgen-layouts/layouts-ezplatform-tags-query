@@ -285,7 +285,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                 $tags = array_merge($tags, $value);
             }
         }
-        
+
         return array_unique($tags);
     }
 
