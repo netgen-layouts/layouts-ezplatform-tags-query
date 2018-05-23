@@ -121,14 +121,14 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         );
 
         $builder->add(
-            'use_tags_from_url',
+            'use_tags_from_query_string',
             ParameterType\Compound\BooleanType::class,
             [
                 'groups' => $advancedGroup,
             ]
         );
 
-        $builder->get('use_tags_from_url')->add(
+        $builder->get('use_tags_from_query_string')->add(
             'query_string_param_name',
             ParameterType\TextLineType::class,
             [
@@ -272,7 +272,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $tags = array_merge($tags, $this->getTagsFromContent($query));
         }
 
-        if ($query->getParameter('use_tags_from_url')->getValue()) {
+        if ($query->getParameter('use_tags_from_query_string')->getValue()) {
             $request = $this->requestStack->getCurrentRequest();
             $queryParam = $query->getParameter('query_string_param_name');
 
