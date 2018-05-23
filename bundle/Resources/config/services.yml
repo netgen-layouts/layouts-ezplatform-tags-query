@@ -10,6 +10,7 @@ services:
             - "@ezpublish.spi.persistence.content_type_handler"
             - "@ezpublish.translation_helper"
             - "@netgen_block_manager.ezpublish.content_provider"
+            - "@request_stack"
         calls:
             - [setLanguages, ["$languages$"]]
         tags:

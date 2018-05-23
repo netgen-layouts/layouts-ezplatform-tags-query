@@ -13,3 +13,5 @@ query.ezcontent_tags.use_tags_from_current_content: 'Also use tags from current 
 query.ezcontent_tags.tags_filter_logic: 'Tags filter logic'
 query.ezcontent_tags.filter_by_tags: 'Select tags'
 query.ezcontent_tags.query_type: 'Query type'
+query.ezcontent_tags.use_tags_from_query_string: "Use tags from query string"
+query.ezcontent_tags.query_string_param_name: "Query string param name"
