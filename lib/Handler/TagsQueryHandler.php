@@ -321,8 +321,15 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $this->getContentTypeFilterCriteria($query),
         ];
 
+        $criteria = array_filter(
+            $criteria,
+            function ($criterion) {
+                return $criterion instanceof Criterion;
+            }
+        );
+
         $locationQuery = new LocationQuery();
-        $locationQuery->filter = new Criterion\LogicalAnd(array_filter($criteria));
+        $locationQuery->filter = new Criterion\LogicalAnd($criteria);
         $locationQuery->sortClauses = $this->getSortClauses($query, $parentLocation);
 
         return $locationQuery;
