@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Netgen\Bundle\LayoutsTagsQueryBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
@@ -12,7 +14,7 @@ use Symfony\Component\Yaml\Yaml;
 
 final class NetgenLayoutsTagsQueryExtension extends Extension implements PrependExtensionInterface
 {
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader(
             $container,
@@ -22,7 +24,7 @@ final class NetgenLayoutsTagsQueryExtension extends Extension implements Prepend
         $loader->load('services.yml');
     }
 
-    public function prepend(ContainerBuilder $container)
+    public function prepend(ContainerBuilder $container): void
     {
         $prependConfigs = [
             'query_types.yml' => 'netgen_block_manager',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Netgen\Layouts\TagsQuery\Handler;
 
 use eZ\Publish\API\Repository\LocationService;
@@ -83,15 +85,13 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     /**
      * Sets the current siteaccess languages into the handler.
-     *
-     * @param array $languages
      */
-    public function setLanguages(array $languages = null)
+    public function setLanguages(array $languages = null): void
     {
         $this->languages = is_array($languages) ? $languages : [];
     }
 
-    public function buildParameters(ParameterBuilderInterface $builder)
+    public function buildParameters(ParameterBuilderInterface $builder): void
     {
         $advancedGroup = [self::GROUP_ADVANCED];
 
@@ -173,7 +173,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $locationQuery = $this->buildLocationQuery($query, $parentLocation, $tagIds);
         $locationQuery->offset = $this->getOffset($offset);
-        $locationQuery->limit = $this->getLimit($limit);
+        $locationQuery->limit = $this->getLimit($limit) ?? $locationQuery->limit;
 
         // We're disabling query count for performance reasons, however
         // it can only be disabled if limit is not 0
@@ -194,7 +194,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         return $locations;
     }
 
-    public function getCount(Query $query)
+    public function getCount(Query $query): int
     {
         $parentLocation = $this->getParentLocation($query);
 
@@ -216,10 +216,10 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             ['languages' => $this->languages]
         );
 
-        return $searchResult->totalCount;
+        return $searchResult->totalCount ?? 0;
     }
 
-    public function isContextual(Query $query)
+    public function isContextual(Query $query): bool
     {
         return $query->getParameter('use_current_location')->getValue()
             || $query->getParameter('use_tags_from_current_content')->getValue();
@@ -227,18 +227,10 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     /**
      * Return filtered offset value to use.
-     *
-     * @param int|null $offset
-     *
-     * @return int
      */
-    private function getOffset($offset)
+    private function getOffset(int $offset): int
     {
-        if (is_int($offset) && $offset >= 0) {
-            return $offset;
-        }
-
-        return 0;
+        return $offset >= 0 ? $offset : 0;
     }
 
     /**
@@ -248,23 +240,22 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      *
      * @return int
      */
-    private function getLimit($limit)
+    private function getLimit(int $limit = null): ?int
     {
         if (is_int($limit) && $limit >= 0) {
             return $limit;
         }
+
+        return null;
     }
 
     /**
-     * Returns a list of tag ids.
-     *
-     * @param \Netgen\BlockManager\API\Values\Collection\Query $query
-     *
-     * @return int[]|string[]
+     * Returns a list of tag IDs.
      */
-    private function getTagIds(Query $query)
+    private function getTagIds(Query $query): array
     {
         $tags = [];
+
         if (!$query->getParameter('filter_by_tags')->isEmpty()) {
             $tags = array_values($query->getParameter('filter_by_tags')->getValue());
         }
@@ -292,14 +283,8 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     /**
      * Builds the Location query from given parameters.
-     *
-     * @param \Netgen\BlockManager\API\Values\Collection\Query $query
-     * @param Location $parentLocation
-     * @param array $tagIds
-     *
-     * @return LocationQuery
      */
-    private function buildLocationQuery(Query $query, Location $parentLocation, array $tagIds)
+    private function buildLocationQuery(Query $query, Location $parentLocation, array $tagIds): LocationQuery
     {
         $tagsCriteria = array_map(
             function ($tagId) {
@@ -335,7 +320,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         return $locationQuery;
     }
 
-    private function getTagsFromContent(Query $query)
+    private function getTagsFromContent(Query $query): array
     {
         $content = $this->contentProvider->provideContent();
 
@@ -358,7 +343,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         return array_merge($tags, $this->getTagsFromAllContentFields($content));
     }
 
-    private function getTagsFromField(Content $content, $fieldDefinitionIdentifier)
+    private function getTagsFromField(Content $content, string $fieldDefinitionIdentifier): array
     {
         if (!array_key_exists($fieldDefinitionIdentifier, $content->fields)) {
             return [];
@@ -381,7 +366,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         );
     }
 
-    private function getTagsFromAllContentFields(Content $content)
+    private function getTagsFromAllContentFields(Content $content): array
     {
         $tags = [];
 
