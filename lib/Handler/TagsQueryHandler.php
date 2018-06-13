@@ -235,10 +235,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     /**
      * Return filtered limit value to use.
-     *
-     * @param int|null $limit
-     *
-     * @return int
      */
     private function getLimit(int $limit = null): ?int
     {
