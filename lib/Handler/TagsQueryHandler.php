@@ -221,8 +221,8 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     public function isContextual(Query $query): bool
     {
-        return $query->getParameter('use_current_location')->getValue()
-            || $query->getParameter('use_tags_from_current_content')->getValue();
+        return $query->getParameter('use_current_location')->getValue() === true
+            || $query->getParameter('use_tags_from_current_content')->getValue() === true;
     }
 
     /**
@@ -256,12 +256,12 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             $tags = array_values($query->getParameter('filter_by_tags')->getValue());
         }
 
-        if ($query->getParameter('use_tags_from_current_content')->getValue()) {
+        if ($query->getParameter('use_tags_from_current_content')->getValue() === true) {
             $tags = array_merge($tags, $this->getTagsFromContent($query));
         }
 
         $request = $this->requestStack->getCurrentRequest();
-        if ($request instanceof Request && $query->getParameter('use_tags_from_query_string')->getValue()) {
+        if ($request instanceof Request && $query->getParameter('use_tags_from_query_string')->getValue() === true) {
             $queryStringParam = $query->getParameter('query_string_param_name');
 
             if (!$queryStringParam->isEmpty() && $request->query->has($queryStringParam->getValue())) {
