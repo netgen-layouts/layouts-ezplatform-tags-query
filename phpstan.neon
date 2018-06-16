@@ -1,4 +1,4 @@
 parameters:
     ignoreErrors:
-        # eZ Publish
+        # eZ Platform
         - '#Access to protected property eZ\\Publish\\API\\Repository\\Values\\Content\\Field::\$value.#'
