@@ -86,7 +86,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     /**
      * Sets the current siteaccess languages into the handler.
      */
-    public function setLanguages(array $languages = null): void
+    public function setLanguages(?array $languages = null): void
     {
         $this->languages = is_array($languages) ? $languages : [];
     }
@@ -236,7 +236,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     /**
      * Return filtered limit value to use.
      */
-    private function getLimit(int $limit = null): ?int
+    private function getLimit(?int $limit = null): ?int
     {
         if (is_int($limit) && $limit >= 0) {
             return $limit;
