@@ -369,10 +369,12 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         $contentType = $this->contentTypeHandler->load($content->contentInfo->contentTypeId);
 
         $tagFields = array_map(
-            function (FieldDefinition $definition): string {
+            function (FieldDefinition $definition): ?string {
                 if ($definition->fieldType === 'eztags') {
                     return $definition->identifier;
                 }
+
+                return null;
             },
             $contentType->fieldDefinitions
         );
