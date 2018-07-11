@@ -88,7 +88,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     public function setLanguages(?array $languages = null): void
     {
-        $this->languages = is_array($languages) ? $languages : [];
+        $this->languages = $languages ?? [];
     }
 
     public function buildParameters(ParameterBuilderInterface $builder): void
