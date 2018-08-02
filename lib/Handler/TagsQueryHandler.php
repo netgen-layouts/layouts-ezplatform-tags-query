@@ -253,11 +253,11 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         $tags = [];
 
         if (!$query->getParameter('filter_by_tags')->isEmpty()) {
-            $tags = array_values($query->getParameter('filter_by_tags')->getValue());
+            $tags[] = array_values($query->getParameter('filter_by_tags')->getValue());
         }
 
         if ($query->getParameter('use_tags_from_current_content')->getValue() === true) {
-            $tags = array_merge($tags, $this->getTagsFromContent($query));
+            $tags[] = $this->getTagsFromContent($query);
         }
 
         $request = $this->requestStack->getCurrentRequest();
@@ -270,11 +270,11 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
                     $value = [$value];
                 }
 
-                $tags = array_merge($tags, $value);
+                $tags[] = $value;
             }
         }
 
-        return array_unique($tags);
+        return array_unique(array_merge(...$tags));
     }
 
     /**
@@ -324,19 +324,20 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             return [];
         }
 
-        $tags = [];
-        if (!$query->getParameter('field_definition_identifier')->isEmpty()) {
-            $fieldDefinitionIdentifiers = $query->getParameter('field_definition_identifier')->getValue();
-            $fieldDefinitionIdentifiers = explode(',', $fieldDefinitionIdentifiers);
-
-            foreach ($fieldDefinitionIdentifiers as $fieldDefinitionIdentifier) {
-                $tags = array_merge($tags, $this->getTagsFromField($content, trim($fieldDefinitionIdentifier)));
-            }
-
-            return $tags;
+        if ($query->getParameter('field_definition_identifier')->isEmpty()) {
+            return $this->getTagsFromAllContentFields($content);
         }
 
-        return array_merge($tags, $this->getTagsFromAllContentFields($content));
+        $fieldDefinitionIdentifiers = $query->getParameter('field_definition_identifier')->getValue();
+        $fieldDefinitionIdentifiers = explode(',', $fieldDefinitionIdentifiers);
+
+        $tags = [];
+
+        foreach ($fieldDefinitionIdentifiers as $fieldDefinitionIdentifier) {
+            $tags[] = $this->getTagsFromField($content, trim($fieldDefinitionIdentifier));
+        }
+
+        return array_merge(...$tags);
     }
 
     private function getTagsFromField(Content $content, string $fieldDefinitionIdentifier): array
@@ -364,31 +365,31 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     private function getTagsFromAllContentFields(Content $content): array
     {
-        $tags = [];
-
         $contentType = $this->contentTypeHandler->load($content->contentInfo->contentTypeId);
 
-        $tagFields = array_map(
-            function (FieldDefinition $definition): ?string {
-                if ($definition->fieldType === 'eztags') {
-                    return $definition->identifier;
-                }
+        $tagFields = array_filter(
+            array_map(
+                function (FieldDefinition $definition): ?string {
+                    if ($definition->fieldType === 'eztags') {
+                        return $definition->identifier;
+                    }
 
-                return null;
-            },
-            $contentType->fieldDefinitions
+                    return null;
+                },
+                $contentType->fieldDefinitions
+            )
         );
 
-        $tagFields = array_filter($tagFields);
+        $tags = [];
 
         foreach ($content->fields as $field) {
             if (!in_array($field->fieldDefIdentifier, $tagFields, true)) {
                 continue;
             }
 
-            $tags = array_merge($tags, $this->getTagsFromField($content, $field->fieldDefIdentifier));
+            $tags[] = $this->getTagsFromField($content, $field->fieldDefIdentifier);
         }
 
-        return $tags;
+        return array_merge(...$tags);
     }
 }
