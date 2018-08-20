@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "netgen/block-manager-ezpublish": ">=0.10, <1.0",
+        "netgen/layouts-ezplatform": ">=0.12, <1.0",
         "netgen/tagsbundle": "^2.0 || ^3.0"
     },
     "require-dev": {
