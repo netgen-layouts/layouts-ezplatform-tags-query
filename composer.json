@@ -2,6 +2,7 @@
     "name": "netgen/layouts-tags-query",
     "description": "Netgen Layouts tags query",
     "license": "proprietary",
+    "type": "symfony-bundle",
     "authors": [
         {
             "name": "Netgen",
