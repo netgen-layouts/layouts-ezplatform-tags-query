@@ -185,7 +185,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         );
 
         $locations = array_map(
-            function (SearchHit $searchHit) {
+            static function (SearchHit $searchHit) {
                 return $searchHit->valueObject;
             },
             $searchResult->searchHits
@@ -283,7 +283,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     private function buildLocationQuery(Query $query, Location $parentLocation, array $tagIds): LocationQuery
     {
         $tagsCriteria = array_map(
-            function ($tagId): TagId {
+            static function ($tagId): TagId {
                 return new TagId($tagId);
             },
             $tagIds
@@ -304,7 +304,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $criteria = array_filter(
             $criteria,
-            function ($criterion): bool {
+            static function ($criterion): bool {
                 return $criterion instanceof Criterion;
             }
         );
@@ -356,7 +356,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         }
 
         return array_map(
-            function (Tag $tag) {
+            static function (Tag $tag) {
                 return $tag->id;
             },
             $field->value->tags
@@ -369,7 +369,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $tagFields = array_filter(
             array_map(
-                function (FieldDefinition $definition): ?string {
+                static function (FieldDefinition $definition): ?string {
                     if ($definition->fieldType === 'eztags') {
                         return $definition->identifier;
                     }
