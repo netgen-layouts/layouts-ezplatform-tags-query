@@ -1,7 +1,6 @@
 services:
     netgen_block_manager.collection.query_type.handler.ezcontent_tags:
         class: Netgen\Layouts\TagsQuery\Handler\TagsQueryHandler
-        public: false
         # Needs to be lazy since we're injecting "languages" dynamic param
         lazy: true
         arguments:
