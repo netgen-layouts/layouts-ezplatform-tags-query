@@ -11,7 +11,6 @@ use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
-use eZ\Publish\Core\Helper\TranslationHelper;
 use eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler;
 use Netgen\BlockManager\API\Values\Collection\Query;
@@ -46,11 +45,6 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     private $searchService;
 
     /**
-     * @var \eZ\Publish\Core\Helper\TranslationHelper
-     */
-    private $translationHelper;
-
-    /**
      * Injected list of prioritized languages.
      *
      * @var array
@@ -66,12 +60,10 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         LocationService $locationService,
         SearchService $searchService,
         Handler $contentTypeHandler,
-        TranslationHelper $translationHelper,
         ContentProviderInterface $contentProvider,
         RequestStack $requestStack
     ) {
         $this->searchService = $searchService;
-        $this->translationHelper = $translationHelper;
         $this->requestStack = $requestStack;
 
         $this->setLocationService($locationService);
@@ -338,16 +330,9 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
     private function getTagsFromField(Content $content, string $fieldDefinitionIdentifier): array
     {
-        if (!array_key_exists($fieldDefinitionIdentifier, $content->fields)) {
-            return [];
-        }
+        $fieldValue = $content->getFieldValue($fieldDefinitionIdentifier);
 
-        $field = $this->translationHelper->getTranslatedField(
-            $content,
-            $fieldDefinitionIdentifier
-        );
-
-        if ($field === null || !$field->value instanceof TagsFieldValue) {
+        if ($fieldValue === null || !$fieldValue instanceof TagsFieldValue) {
             return [];
         }
 
@@ -355,7 +340,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
             static function (Tag $tag) {
                 return $tag->id;
             },
-            $field->value->tags
+            $fieldValue->tags
         );
     }
 

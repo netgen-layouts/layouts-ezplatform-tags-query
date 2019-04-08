@@ -1,7 +1,2 @@
 includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
-
-parameters:
-    ignoreErrors:
-        # eZ Platform
-        - '#Access to protected property eZ\\Publish\\API\\Repository\\Values\\Content\\Field::\$value.#'
