@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "netgen/layouts-ezplatform": ">=0.12, <1.0",
+        "netgen/layouts-ezplatform": "^1.0",
         "netgen/tagsbundle": "^2.0 || ^3.0"
     },
     "require-dev": {
@@ -33,7 +33,7 @@
     "prefer-stable": true,
     "extra": {
         "branch-alias": {
-            "dev-master": "2.x-dev"
+            "dev-master": "3.x-dev"
         }
     }
 }
