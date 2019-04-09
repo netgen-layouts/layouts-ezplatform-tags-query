@@ -5,9 +5,9 @@ services:
         lazy: true
         arguments:
             - "@ezpublish.api.service.location"
-            - "@netgen_block_manager.ezplatform.search_service"
+            - "@netgen_layouts.ezplatform.search_service"
             - "@ezpublish.spi.persistence.content_type_handler"
-            - "@netgen_block_manager.ezplatform.content_provider"
+            - "@netgen_layouts.ezplatform.content_provider"
             - "@request_stack"
         calls:
             - [setLanguages, ["$languages$"]]
