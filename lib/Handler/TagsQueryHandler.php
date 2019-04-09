@@ -16,11 +16,7 @@ use eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler;
 use Netgen\BlockManager\API\Values\Collection\Query;
 use Netgen\BlockManager\Collection\QueryType\QueryTypeHandlerInterface;
-use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\ContentTypeFilterTrait;
-use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\MainLocationFilterTrait;
-use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\ParentLocationTrait;
-use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\QueryTypeFilterTrait;
-use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits\SortTrait;
+use Netgen\BlockManager\Ez\Collection\QueryType\Handler\Traits;
 use Netgen\BlockManager\Ez\ContentProvider\ContentProviderInterface;
 use Netgen\BlockManager\Ez\Parameters\ParameterType as EzParameterType;
 use Netgen\BlockManager\Parameters\ParameterBuilderInterface;
@@ -38,11 +34,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class TagsQueryHandler implements QueryTypeHandlerInterface
 {
-    use ParentLocationTrait;
-    use ContentTypeFilterTrait;
-    use MainLocationFilterTrait;
-    use QueryTypeFilterTrait;
-    use SortTrait;
+    use Traits\ParentLocationTrait;
+    use Traits\ContentTypeFilterTrait;
+    use Traits\MainLocationFilterTrait;
+    use Traits\QueryTypeFilterTrait;
+    use Traits\SortTrait;
 
     /**
      * @var \eZ\Publish\API\Repository\SearchService
