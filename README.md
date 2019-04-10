@@ -29,6 +29,6 @@ new Netgen\Bundle\LayoutsTagsQueryBundle\NetgenLayoutsTagsQueryBundle(),
 
 Due to how prepending configuration of other bundles works in Symfony, to make
 this query type display after the existing eZ Platform query type, you need to
-add the bundle BEFORE `NetgenEzPublishBlockManagerBundle` in the list of
+add the bundle BEFORE `NetgenLayoutsEzPlatformBundle` in the list of
 activated bundles.
 
