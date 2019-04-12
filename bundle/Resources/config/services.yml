@@ -12,4 +12,4 @@ services:
         calls:
             - [setLanguages, ["$languages$"]]
         tags:
-            - { name: netgen_block_manager.collection.query_type_handler, type: ezcontent_tags }
+            - { name: netgen_layouts.query_type_handler, type: ezcontent_tags }
