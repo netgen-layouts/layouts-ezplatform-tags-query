@@ -3,5 +3,4 @@ vendor/
 .php_cs.cache
 composer.lock
 composer.phar
-phpunit.phar
 studio.json
