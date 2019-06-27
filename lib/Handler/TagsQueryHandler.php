@@ -11,6 +11,7 @@ use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler;
 use Netgen\Layouts\API\Values\Collection\Query;
@@ -28,10 +29,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Query handler implementation providing values through eZ Platform Tags field.
- *
- * @final
  */
-class TagsQueryHandler implements QueryTypeHandlerInterface
+final class TagsQueryHandler implements QueryTypeHandlerInterface
 {
     use Traits\ParentLocationTrait;
     use Traits\ContentTypeFilterTrait;
@@ -45,11 +44,9 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
     private $searchService;
 
     /**
-     * Injected list of prioritized languages.
-     *
-     * @var array
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
      */
-    private $languages = [];
+    private $configResolver;
 
     /**
      * @var \Symfony\Component\HttpFoundation\RequestStack
@@ -61,22 +58,16 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
         SearchService $searchService,
         Handler $contentTypeHandler,
         ContentProviderInterface $contentProvider,
+        ConfigResolverInterface $configResolver,
         RequestStack $requestStack
     ) {
         $this->searchService = $searchService;
+        $this->configResolver = $configResolver;
         $this->requestStack = $requestStack;
 
         $this->setLocationService($locationService);
         $this->setContentTypeHandler($contentTypeHandler);
         $this->setContentProvider($contentProvider);
-    }
-
-    /**
-     * Sets the current siteaccess languages into the handler.
-     */
-    public function setLanguages(?array $languages = null): void
-    {
-        $this->languages = $languages ?? [];
     }
 
     public function buildParameters(ParameterBuilderInterface $builder): void
@@ -169,7 +160,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $searchResult = $this->searchService->findLocations(
             $locationQuery,
-            ['languages' => $this->languages]
+            ['languages' => $this->configResolver->getParameter('languages')]
         );
 
         $locations = array_map(
@@ -201,7 +192,7 @@ class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $searchResult = $this->searchService->findLocations(
             $locationQuery,
-            ['languages' => $this->languages]
+            ['languages' => $this->configResolver->getParameter('languages')]
         );
 
         return $searchResult->totalCount ?? 0;
