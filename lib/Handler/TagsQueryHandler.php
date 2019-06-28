@@ -328,8 +328,8 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         }
 
         return array_map(
-            static function (Tag $tag) {
-                return $tag->id;
+            static function (Tag $tag): int {
+                return (int) $tag->id;
             },
             $fieldValue->tags
         );
