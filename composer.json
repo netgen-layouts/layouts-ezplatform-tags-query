@@ -11,7 +11,7 @@
     ],
     "require": {
         "netgen/layouts-ezplatform": "^1.0",
-        "netgen/tagsbundle": "^3.4"
+        "netgen/tagsbundle": "^3.4 || ^4.0"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.11",
