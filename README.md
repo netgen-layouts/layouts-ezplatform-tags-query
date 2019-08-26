@@ -10,7 +10,7 @@ block via Tags field type available in any content in eZ Platform CMS.
 Run the following from your installation root to install the package:
 
 ```bash
-$ composer require netgen/layouts-tags-query:^1.0
+$ composer require netgen/layouts-tags-query
 ```
 
 ### Activate the bundle in your app kernel
