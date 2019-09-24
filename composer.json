@@ -18,6 +18,9 @@
         "phpstan/phpstan-strict-rules": "^0.11",
         "vimeo/psalm": "^3.4"
     },
+    "conflict": {
+        "netgen/layouts-tags-query": "*"
+    },
     "scripts": {
         "phpstan": "@php vendor/bin/phpstan analyse -c phpstan.neon --level=7 --ansi lib bundle",
         "psalm": "@php vendor/bin/psalm -c psalm.xml --show-info=false"
