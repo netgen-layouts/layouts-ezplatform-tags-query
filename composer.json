@@ -24,8 +24,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Netgen\\Layouts\\TagsQuery\\": "lib/",
-            "Netgen\\Bundle\\LayoutsTagsQueryBundle\\": "bundle/"
+            "Netgen\\Layouts\\Ez\\TagsQuery\\": "lib/",
+            "Netgen\\Bundle\\LayoutsEzPlatformTagsQueryBundle\\": "bundle/"
         }
     },
     "minimum-stability": "dev",

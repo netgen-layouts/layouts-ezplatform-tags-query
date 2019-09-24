@@ -21,7 +21,7 @@ Add the following to the list of activated bundles:
 $bundles = [
 ...
 
-new Netgen\Bundle\LayoutsTagsQueryBundle\NetgenLayoutsTagsQueryBundle(),
+new Netgen\Bundle\LayoutsEzPlatformTagsQueryBundle\NetgenLayoutsEzPlatformTagsQueryBundle(),
 
 ...
 ];

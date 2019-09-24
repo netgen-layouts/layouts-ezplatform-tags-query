@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Netgen\Layouts\TagsQuery\Handler;
+namespace Netgen\Layouts\Ez\TagsQuery\Handler;
 
 use eZ\Publish\API\Repository\LocationService;
 use eZ\Publish\API\Repository\SearchService;

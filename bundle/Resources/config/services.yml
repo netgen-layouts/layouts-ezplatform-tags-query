@@ -1,6 +1,6 @@
 services:
     netgen_layouts.tags_query.handler:
-        class: Netgen\Layouts\TagsQuery\Handler\TagsQueryHandler
+        class: Netgen\Layouts\Ez\TagsQuery\Handler\TagsQueryHandler
         arguments:
             - "@ezpublish.api.service.location"
             - "@netgen_layouts.ezplatform.search_service"

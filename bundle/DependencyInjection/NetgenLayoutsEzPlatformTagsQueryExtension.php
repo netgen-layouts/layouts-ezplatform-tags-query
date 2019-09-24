@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Netgen\Bundle\LayoutsTagsQueryBundle\DependencyInjection;
+namespace Netgen\Bundle\LayoutsEzPlatformTagsQueryBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Yaml\Yaml;
 
-final class NetgenLayoutsTagsQueryExtension extends Extension implements PrependExtensionInterface
+final class NetgenLayoutsEzPlatformTagsQueryExtension extends Extension implements PrependExtensionInterface
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
