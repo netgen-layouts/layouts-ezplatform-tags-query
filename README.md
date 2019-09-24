@@ -1,4 +1,4 @@
-# Netgen Layouts Tags Query
+# Netgen Layouts query based on Netgen Tags for eZ Platform
 
 This bundle provides Netgen Layouts query that makes it possible to add items to
 block via Tags field type available in any content in eZ Platform CMS.

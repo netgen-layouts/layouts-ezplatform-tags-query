@@ -1,6 +1,6 @@
 {
     "name": "netgen/layouts-ezplatform-tags-query",
-    "description": "Query for Netgen Layouts based on Netgen Tags bundle for eZ Platform",
+    "description": "Netgen Layouts query based on Netgen Tags for eZ Platform",
     "license": "GPL-2.0-or-later",
     "type": "symfony-bundle",
     "authors": [
