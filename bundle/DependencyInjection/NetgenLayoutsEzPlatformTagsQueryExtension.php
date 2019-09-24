@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Netgen\Bundle\LayoutsEzPlatformTagsQueryBundle\DependencyInjection;
 
+use Netgen\Layouts\Exception\RuntimeException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -16,6 +17,12 @@ final class NetgenLayoutsEzPlatformTagsQueryExtension extends Extension implemen
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
+        $activatedBundles = array_keys($container->getParameter('kernel.bundles'));
+
+        if (!in_array('NetgenTagsBundle', $activatedBundles, true)) {
+            throw new RuntimeException('Netgen Layouts Tags Query Bundle requires Netgen Tags (netgen/tagsbundle) to be activated to work properly.');
+        }
+
         $loader = new YamlFileLoader(
             $container,
             new FileLocator(__DIR__ . '/../Resources/config')
