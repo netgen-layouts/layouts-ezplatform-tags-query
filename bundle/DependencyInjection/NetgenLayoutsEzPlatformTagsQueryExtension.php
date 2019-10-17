@@ -28,13 +28,13 @@ final class NetgenLayoutsEzPlatformTagsQueryExtension extends Extension implemen
             new FileLocator(__DIR__ . '/../Resources/config')
         );
 
-        $loader->load('services.yml');
+        $loader->load('services.yaml');
     }
 
     public function prepend(ContainerBuilder $container): void
     {
         $prependConfigs = [
-            'query_types.yml' => 'netgen_layouts',
+            'query_types.yaml' => 'netgen_layouts',
         ];
 
         foreach ($prependConfigs as $configFile => $prependConfig) {
