@@ -11,6 +11,7 @@ use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
+use eZ\Publish\API\Repository\Values\ValueObject;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler;
@@ -164,7 +165,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         );
 
         $locations = array_map(
-            static function (SearchHit $searchHit) {
+            static function (SearchHit $searchHit): ValueObject {
                 return $searchHit->valueObject;
             },
             $searchResult->searchHits
@@ -226,6 +227,8 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
     /**
      * Returns a list of tag IDs.
+     *
+     * @return int[]
      */
     private function getTagIds(Query $query): array
     {
@@ -258,6 +261,8 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
     /**
      * Builds the Location query from given parameters.
+     *
+     * @param int[] $tagIds
      */
     private function buildLocationQuery(Query $query, Location $parentLocation, array $tagIds): LocationQuery
     {
@@ -295,6 +300,9 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         return $locationQuery;
     }
 
+    /**
+     * @return int[]
+     */
     private function getTagsFromContent(Query $query): array
     {
         $content = $this->contentProvider->provideContent();
@@ -319,6 +327,9 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         return array_merge(...$tags);
     }
 
+    /**
+     * @return int[]
+     */
     private function getTagsFromField(Content $content, string $fieldDefinitionIdentifier): array
     {
         $fieldValue = $content->getFieldValue($fieldDefinitionIdentifier);
@@ -335,6 +346,9 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         );
     }
 
+    /**
+     * @return int[]
+     */
     private function getTagsFromAllContentFields(Content $content): array
     {
         $contentType = $this->contentTypeHandler->load($content->contentInfo->contentTypeId);

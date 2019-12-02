@@ -15,6 +15,9 @@ use Symfony\Component\Yaml\Yaml;
 
 final class NetgenLayoutsEzPlatformTagsQueryExtension extends Extension implements PrependExtensionInterface
 {
+    /**
+     * @param mixed[] $configs
+     */
     public function load(array $configs, ContainerBuilder $container): void
     {
         $activatedBundles = array_keys($container->getParameter('kernel.bundles'));
