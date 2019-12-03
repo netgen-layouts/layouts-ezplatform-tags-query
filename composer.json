@@ -22,7 +22,7 @@
         "netgen/layouts-tags-query": "*"
     },
     "scripts": {
-        "phpstan": "@php vendor/bin/phpstan analyse -c phpstan.neon --level=7 --ansi lib bundle",
+        "phpstan": "@php vendor/bin/phpstan analyse -c phpstan.neon --level=8 --ansi lib bundle",
         "psalm": "@php vendor/bin/psalm -c psalm.xml --show-info=false"
     },
     "autoload": {
