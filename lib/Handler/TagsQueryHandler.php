@@ -11,10 +11,9 @@ use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
+use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\API\Repository\Values\ValueObject;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
-use eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition;
-use eZ\Publish\SPI\Persistence\Content\Type\Handler;
 use Netgen\Layouts\API\Values\Collection\Query;
 use Netgen\Layouts\Collection\QueryType\QueryTypeHandlerInterface;
 use Netgen\Layouts\Ez\Collection\QueryType\Handler\Traits;
@@ -57,7 +56,6 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     public function __construct(
         LocationService $locationService,
         SearchService $searchService,
-        Handler $contentTypeHandler,
         ContentProviderInterface $contentProvider,
         ConfigResolverInterface $configResolver,
         RequestStack $requestStack
@@ -67,7 +65,6 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         $this->requestStack = $requestStack;
 
         $this->setLocationService($locationService);
-        $this->setContentTypeHandler($contentTypeHandler);
         $this->setContentProvider($contentProvider);
     }
 
@@ -164,14 +161,12 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             ['languages' => $this->configResolver->getParameter('languages')]
         );
 
-        $locations = array_map(
+        return array_map(
             static function (SearchHit $searchHit): ValueObject {
                 return $searchHit->valueObject;
             },
             $searchResult->searchHits
         );
-
-        return $locations;
     }
 
     public function getCount(Query $query): int
@@ -351,18 +346,16 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     private function getTagsFromAllContentFields(Content $content): array
     {
-        $contentType = $this->contentTypeHandler->load($content->contentInfo->contentTypeId);
-
         $tagFields = array_filter(
             array_map(
                 static function (FieldDefinition $definition): ?string {
-                    if ($definition->fieldType === 'eztags') {
+                    if ($definition->fieldTypeIdentifier === 'eztags') {
                         return $definition->identifier;
                     }
 
                     return null;
                 },
-                $contentType->fieldDefinitions
+                $content->getContentType()->getFieldDefinitions()
             )
         );
 

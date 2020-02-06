@@ -4,7 +4,6 @@ services:
         arguments:
             - "@ezpublish.api.service.location"
             - "@netgen_layouts.ezplatform.search_service"
-            - "@ezpublish.spi.persistence.content_type_handler"
             - "@netgen_layouts.ezplatform.content_provider"
             - "@ezpublish.config.resolver"
             - "@request_stack"
