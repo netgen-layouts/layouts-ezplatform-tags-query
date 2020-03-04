@@ -26,6 +26,7 @@ use Netgen\TagsBundle\API\Repository\Values\Tags\Tag;
 use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use eZ\Publish\API\Repository\Values\ContentType\FieldDefinitionCollection;
 
 /**
  * Query handler implementation providing values through eZ Platform Tags field.
@@ -346,20 +347,14 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     private function getTagsFromAllContentFields(Content $content): array
     {
-        $tagFields = array_filter(
-            array_map(
-                static function (FieldDefinition $definition): ?string {
-                    if ($definition->fieldTypeIdentifier === 'eztags') {
-                        return $definition->identifier;
-                    }
-
-                    return null;
-                },
-                $content->getContentType()->getFieldDefinitions()
-            )
-        );
-
         $tags = [];
+        $tagFields = [];
+
+        foreach ($content->getContentType()->getFieldDefinitions() as $definition) {
+            if ($definition->fieldTypeIdentifier === 'eztags') {
+                $tagFields[] = $definition->identifier;
+            }
+        }
 
         foreach ($content->fields as $field) {
             if (!in_array($field->fieldDefIdentifier, $tagFields, true)) {
