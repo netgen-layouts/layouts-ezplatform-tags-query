@@ -11,7 +11,6 @@ use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\API\Repository\Values\ValueObject;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use Netgen\Layouts\API\Values\Collection\Query;
@@ -26,7 +25,17 @@ use Netgen\TagsBundle\API\Repository\Values\Tags\Tag;
 use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinitionCollection;
+use function array_filter;
+use function array_map;
+use function array_merge;
+use function array_unique;
+use function array_values;
+use function count;
+use function explode;
+use function in_array;
+use function is_array;
+use function is_int;
+use function trim;
 
 /**
  * Query handler implementation providing values through eZ Platform Tags field.
