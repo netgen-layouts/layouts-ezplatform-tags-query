@@ -252,7 +252,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             $queryStringParam = $query->getParameter('query_string_param_name');
 
             if (!$queryStringParam->isEmpty() && $request->query->has($queryStringParam->getValue())) {
-                $value = $request->query->get($queryStringParam->getValue());
+                $value = $request->query->all()[$queryStringParam->getValue()] ?? null;
                 if (!is_array($value)) {
                     $value = [$value];
                 }
