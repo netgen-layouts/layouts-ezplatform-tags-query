@@ -7,5 +7,6 @@ services:
             - "@netgen_layouts.ezplatform.content_provider"
             - "@ezpublish.config.resolver"
             - "@request_stack"
+            - "@ezpublish.spi.persistence.object_state_handler"
         tags:
             - { name: netgen_layouts.query_type_handler, type: ezcontent_tags }
