@@ -14,10 +14,12 @@ use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\ValueObject;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition;
-use eZ\Publish\SPI\Persistence\Content\Type\Handler;
+use eZ\Publish\SPI\Persistence\Content\Type\Handler as ContentTypeHandler;
+use eZ\Publish\SPI\Persistence\Content\ObjectState\Handler as ObjectStateHandler;
 use Netgen\Layouts\API\Values\Collection\Query;
 use Netgen\Layouts\Collection\QueryType\QueryTypeHandlerInterface;
 use Netgen\Layouts\Ez\Collection\QueryType\Handler\Traits;
+use Netgen\Layouts\Ez\Collection\QueryType\Handler\Traits\ObjectStateFilterTrait;
 use Netgen\Layouts\Ez\ContentProvider\ContentProviderInterface;
 use Netgen\Layouts\Ez\Parameters\ParameterType as EzParameterType;
 use Netgen\Layouts\Parameters\ParameterBuilderInterface;
@@ -38,6 +40,8 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     use Traits\MainLocationFilterTrait;
     use Traits\QueryTypeFilterTrait;
     use Traits\SortTrait;
+    use Traits\CurrentLocationFilterTrait;
+    use Traits\ObjectStateFilterTrait;
 
     /**
      * @var \eZ\Publish\API\Repository\SearchService
@@ -57,7 +61,8 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     public function __construct(
         LocationService $locationService,
         SearchService $searchService,
-        Handler $contentTypeHandler,
+        ContentTypeHandler $contentTypeHandler,
+        ObjectStateHandler $objectStateHandler,
         ContentProviderInterface $contentProvider,
         ConfigResolverInterface $configResolver,
         RequestStack $requestStack
@@ -68,6 +73,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $this->setLocationService($locationService);
         $this->setContentTypeHandler($contentTypeHandler);
+        $this->setObjectStateHandler($objectStateHandler);
         $this->setContentProvider($contentProvider);
     }
 
@@ -135,6 +141,8 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         $this->buildQueryTypeParameters($builder, $advancedGroup);
         $this->buildMainLocationParameters($builder, $advancedGroup);
         $this->buildContentTypeFilterParameters($builder, $advancedGroup);
+        $this->buildCurrentLocationParameters($builder, $advancedGroup);
+        $this->buildObjectStateFilterParameters($builder, $advancedGroup);
     }
 
     public function getValues(Query $query, int $offset = 0, ?int $limit = null): iterable
@@ -284,7 +292,13 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             $tagsCriteria,
             $this->getMainLocationFilterCriteria($query),
             $this->getContentTypeFilterCriteria($query),
+            $this->getObjectStateFilterCriteria($query),
         ];
+
+        $currentLocation = $this->contentProvider->provideLocation();
+        if ($currentLocation instanceof Location) {
+            $criteria[] = $this->getCurrentLocationFilterCriteria($query, $currentLocation);
+        }
 
         $criteria = array_filter(
             $criteria,

@@ -5,6 +5,7 @@ services:
             - "@ezpublish.api.service.location"
             - "@netgen_layouts.ezplatform.search_service"
             - "@ezpublish.spi.persistence.content_type_handler"
+            - "@ezpublish.spi.persistence.object_state_handler"
             - "@netgen_layouts.ezplatform.content_provider"
             - "@ezpublish.config.resolver"
             - "@request_stack"
