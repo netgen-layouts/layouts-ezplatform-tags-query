@@ -17,7 +17,6 @@ use eZ\Publish\SPI\Persistence\Content\ObjectState\Handler as ObjectStateHandler
 use Netgen\Layouts\API\Values\Collection\Query;
 use Netgen\Layouts\Collection\QueryType\QueryTypeHandlerInterface;
 use Netgen\Layouts\Ez\Collection\QueryType\Handler\Traits;
-use Netgen\Layouts\Ez\Collection\QueryType\Handler\Traits\ObjectStateFilterTrait;
 use Netgen\Layouts\Ez\ContentProvider\ContentProviderInterface;
 use Netgen\Layouts\Ez\Parameters\ParameterType as EzParameterType;
 use Netgen\Layouts\Parameters\ParameterBuilderInterface;
