@@ -15,3 +15,6 @@ query.ezcontent_tags.filter_by_tags: 'Select tags'
 query.ezcontent_tags.query_type: 'Query type'
 query.ezcontent_tags.use_tags_from_query_string: "Use tags from query string"
 query.ezcontent_tags.query_string_param_name: "Query string param name"
+query.ezcontent_tags.exclude_current_location: 'Exclude current location from results'
+query.ezcontent_tags.filter_by_object_state: 'Filter by object state'
+query.ezcontent_tags.object_states: 'Object states'
