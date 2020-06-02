@@ -43,13 +43,13 @@ use function trim;
  */
 final class TagsQueryHandler implements QueryTypeHandlerInterface
 {
-    use Traits\ParentLocationTrait;
     use Traits\ContentTypeFilterTrait;
+    use Traits\CurrentLocationFilterTrait;
     use Traits\MainLocationFilterTrait;
+    use Traits\ObjectStateFilterTrait;
+    use Traits\ParentLocationTrait;
     use Traits\QueryTypeFilterTrait;
     use Traits\SortTrait;
-    use Traits\CurrentLocationFilterTrait;
-    use Traits\ObjectStateFilterTrait;
 
     /**
      * @var \eZ\Publish\API\Repository\SearchService
