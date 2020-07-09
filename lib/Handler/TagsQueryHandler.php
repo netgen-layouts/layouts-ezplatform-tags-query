@@ -268,7 +268,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             }
         }
 
-        return array_unique(array_merge(...$tags));
+        return count($tags) > 0 ? array_unique(array_merge(...$tags)) : [];
     }
 
     /**
