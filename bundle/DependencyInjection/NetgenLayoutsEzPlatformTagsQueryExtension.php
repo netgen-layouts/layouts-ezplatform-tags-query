@@ -12,9 +12,8 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Yaml\Yaml;
-use function array_keys;
+use function array_key_exists;
 use function file_get_contents;
-use function in_array;
 
 final class NetgenLayoutsEzPlatformTagsQueryExtension extends Extension implements PrependExtensionInterface
 {
@@ -23,9 +22,10 @@ final class NetgenLayoutsEzPlatformTagsQueryExtension extends Extension implemen
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $activatedBundles = array_keys($container->getParameter('kernel.bundles'));
+        /** @var array<string, string> $activatedBundles */
+        $activatedBundles = $container->getParameter('kernel.bundles');
 
-        if (!in_array('NetgenTagsBundle', $activatedBundles, true)) {
+        if (!array_key_exists('NetgenTagsBundle', $activatedBundles)) {
             throw new RuntimeException('Netgen Layouts Tags Query Bundle requires Netgen Tags (netgen/tagsbundle) to be activated to work properly.');
         }
 
