@@ -51,20 +51,11 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     use Traits\QueryTypeFilterTrait;
     use Traits\SortTrait;
 
-    /**
-     * @var \eZ\Publish\API\Repository\SearchService
-     */
-    private $searchService;
+    private SearchService $searchService;
 
-    /**
-     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
-     */
-    private $configResolver;
+    private ConfigResolverInterface $configResolver;
 
-    /**
-     * @var \Symfony\Component\HttpFoundation\RequestStack
-     */
-    private $requestStack;
+    private RequestStack $requestStack;
 
     public function __construct(
         LocationService $locationService,
@@ -179,9 +170,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         );
 
         return array_map(
-            static function (SearchHit $searchHit): ValueObject {
-                return $searchHit->valueObject;
-            },
+            static fn (SearchHit $searchHit): ValueObject => $searchHit->valueObject,
             $searchResult->searchHits
         );
     }
@@ -268,7 +257,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             }
         }
 
-        return count($tags) > 0 ? array_unique(array_merge(...$tags)) : [];
+        return array_unique(array_merge(...$tags));
     }
 
     /**
@@ -279,9 +268,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     private function buildLocationQuery(Query $query, Location $parentLocation, array $tagIds): LocationQuery
     {
         $tagsCriteria = array_map(
-            static function ($tagId): TagId {
-                return new TagId($tagId);
-            },
+            static fn ($tagId): TagId => new TagId($tagId),
             $tagIds
         );
 
@@ -306,9 +293,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $criteria = array_filter(
             $criteria,
-            static function ($criterion): bool {
-                return $criterion instanceof Criterion;
-            }
+            static fn ($criterion): bool => $criterion instanceof Criterion
         );
 
         $locationQuery = new LocationQuery();
@@ -357,9 +342,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         }
 
         return array_map(
-            static function (Tag $tag): int {
-                return (int) $tag->id;
-            },
+            static fn (Tag $tag): int => (int) $tag->id,
             $fieldValue->tags
         );
     }

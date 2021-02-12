@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "netgen/layouts-ezplatform": "^1.2",
+        "netgen/layouts-ezplatform": "^1.3",
         "netgen/tagsbundle": "^3.4 || ^4.0"
     },
     "require-dev": {
