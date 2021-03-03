@@ -33,7 +33,6 @@ use function array_unique;
 use function array_values;
 use function count;
 use function explode;
-use function in_array;
 use function is_array;
 use function is_int;
 use function trim;
@@ -353,20 +352,11 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     private function getTagsFromAllContentFields(Content $content): array
     {
         $tags = [];
-        $tagFields = [];
-
-        foreach ($content->getContentType()->getFieldDefinitions() as $definition) {
-            if ($definition->fieldTypeIdentifier === 'eztags') {
-                $tagFields[] = $definition->identifier;
-            }
-        }
 
         foreach ($content->fields as $field) {
-            if (!in_array($field->fieldDefIdentifier, $tagFields, true)) {
-                continue;
+            if ($field->fieldTypeIdentifier === 'eztags') {
+                $tags[] = $this->getTagsFromField($content, $field->fieldDefIdentifier);
             }
-
-            $tags[] = $this->getTagsFromField($content, $field->fieldDefIdentifier);
         }
 
         return array_merge(...$tags);
