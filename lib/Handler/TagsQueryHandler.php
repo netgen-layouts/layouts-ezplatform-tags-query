@@ -257,7 +257,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             }
         }
 
-        return array_unique(array_merge(...$tags));
+        return array_map('intval', array_unique(array_merge(...$tags)));
     }
 
     /**
@@ -268,7 +268,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     private function buildLocationQuery(Query $query, Location $parentLocation, array $tagIds): LocationQuery
     {
         $tagsCriteria = array_map(
-            static fn ($tagId): TagId => new TagId($tagId),
+            static fn (int $tagId): TagId => new TagId($tagId),
             $tagIds
         );
 
@@ -293,7 +293,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $criteria = array_filter(
             $criteria,
-            static fn ($criterion): bool => $criterion instanceof Criterion
+            static fn (?Criterion $criterion): bool => $criterion instanceof Criterion
         );
 
         $locationQuery = new LocationQuery();
