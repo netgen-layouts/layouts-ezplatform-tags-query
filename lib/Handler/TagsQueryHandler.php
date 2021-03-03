@@ -7,6 +7,7 @@ namespace Netgen\Layouts\Ez\TagsQuery\Handler;
 use eZ\Publish\API\Repository\LocationService;
 use eZ\Publish\API\Repository\SearchService;
 use eZ\Publish\API\Repository\Values\Content\Content;
+use eZ\Publish\API\Repository\Values\Content\Field;
 use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
@@ -35,7 +36,6 @@ use function count;
 use function explode;
 use function is_array;
 use function is_int;
-use function trim;
 
 /**
  * Query handler implementation providing values through eZ Platform Tags field.
@@ -247,12 +247,8 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             $queryStringParam = $query->getParameter('query_string_param_name');
 
             if (!$queryStringParam->isEmpty() && $request->query->has($queryStringParam->getValue())) {
-                $value = $request->query->all()[$queryStringParam->getValue()] ?? null;
-                if (!is_array($value)) {
-                    $value = [$value];
-                }
-
-                $tags[] = $value;
+                $value = $request->query->get($queryStringParam->getValue());
+                $tags[] = !is_array($value) ? [$value] : $value;
             }
         }
 
@@ -266,20 +262,15 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     private function buildLocationQuery(Query $query, Location $parentLocation, array $tagIds): LocationQuery
     {
-        $tagsCriteria = array_map(
-            static fn (int $tagId): TagId => new TagId($tagId),
-            $tagIds
-        );
-
-        $tagsCriteria = $query->getParameter('tags_filter_logic')->getValue() === 'any' ?
-            new Criterion\LogicalOr($tagsCriteria) :
-            new Criterion\LogicalAnd($tagsCriteria);
+        $tagsCriteria = array_map(static fn (int $tagId): TagId => new TagId($tagId), $tagIds);
 
         $criteria = [
             new Criterion\Subtree($parentLocation->pathString),
             new Criterion\Visibility(Criterion\Visibility::VISIBLE),
             $this->getQueryTypeFilterCriteria($query, $parentLocation),
-            $tagsCriteria,
+            $query->getParameter('tags_filter_logic')->getValue() === 'any' ?
+                new Criterion\LogicalOr($tagsCriteria) :
+                new Criterion\LogicalAnd($tagsCriteria),
             $this->getMainLocationFilterCriteria($query),
             $this->getContentTypeFilterCriteria($query),
             $this->getObjectStateFilterCriteria($query),
@@ -303,6 +294,23 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     }
 
     /**
+     * @return string[]
+     */
+    private function getValidFieldIdentifiers(Query $query, Content $content): array
+    {
+        $parameter = $query->getParameter('field_definition_identifier');
+
+        if ($parameter->isEmpty()) {
+            return array_map(
+                static fn (Field $field): string => $field->fieldDefIdentifier,
+                $content->fields
+            );
+        }
+
+        return array_map('trim', explode(',', $parameter->getValue()));
+    }
+
+    /**
      * @return int[]
      */
     private function getTagsFromContent(Query $query): array
@@ -313,17 +321,12 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             return [];
         }
 
-        if ($query->getParameter('field_definition_identifier')->isEmpty()) {
-            return $this->getTagsFromAllContentFields($content);
-        }
-
-        $fieldDefinitionIdentifiers = $query->getParameter('field_definition_identifier')->getValue();
-        $fieldDefinitionIdentifiers = explode(',', $fieldDefinitionIdentifiers);
+        $fieldIdentifiers = $this->getValidFieldIdentifiers($query, $content);
 
         $tags = [];
 
-        foreach ($fieldDefinitionIdentifiers as $fieldDefinitionIdentifier) {
-            $tags[] = $this->getTagsFromField($content, trim($fieldDefinitionIdentifier));
+        foreach ($fieldIdentifiers as $fieldIdentifier) {
+            $tags[] = $this->getTagsFromField($content, $fieldIdentifier);
         }
 
         return array_merge(...$tags);
@@ -335,8 +338,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
     private function getTagsFromField(Content $content, string $fieldDefinitionIdentifier): array
     {
         $fieldValue = $content->getFieldValue($fieldDefinitionIdentifier);
-
-        if ($fieldValue === null || !$fieldValue instanceof TagsFieldValue) {
+        if (!$fieldValue instanceof TagsFieldValue) {
             return [];
         }
 
@@ -344,21 +346,5 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             static fn (Tag $tag): int => (int) $tag->id,
             $fieldValue->tags
         );
-    }
-
-    /**
-     * @return int[]
-     */
-    private function getTagsFromAllContentFields(Content $content): array
-    {
-        $tags = [];
-
-        foreach ($content->fields as $field) {
-            if ($field->fieldTypeIdentifier === 'eztags') {
-                $tags[] = $this->getTagsFromField($content, $field->fieldDefIdentifier);
-            }
-        }
-
-        return array_merge(...$tags);
     }
 }
