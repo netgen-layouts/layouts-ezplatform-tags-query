@@ -27,6 +27,7 @@ use Netgen\TagsBundle\API\Repository\Values\Tags\Tag;
 use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Kernel;
 use function array_filter;
 use function array_map;
 use function array_merge;
@@ -247,8 +248,9 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             $queryStringParam = $query->getParameter('query_string_param_name');
 
             if (!$queryStringParam->isEmpty() && $request->query->has($queryStringParam->getValue())) {
-                $value = $request->query->get($queryStringParam->getValue());
-                $tags[] = !is_array($value) ? [$value] : $value;
+                $tags[] = Kernel::VERSION_ID >= 50100 ?
+                    $request->query->all($queryStringParam->getValue()) :
+                    (array) ($request->query->get($queryStringParam->getValue()) ?? []);
             }
         }
 
