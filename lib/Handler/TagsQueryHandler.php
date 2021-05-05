@@ -84,7 +84,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             EzParameterType\TagsType::class,
             [
                 'allow_invalid' => true,
-            ]
+            ],
         );
 
         $builder->add(
@@ -92,7 +92,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             ParameterType\Compound\BooleanType::class,
             [
                 'groups' => $advancedGroup,
-            ]
+            ],
         );
 
         $builder->get('use_tags_from_current_content')->add(
@@ -100,7 +100,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             ParameterType\TextLineType::class,
             [
                 'groups' => $advancedGroup,
-            ]
+            ],
         );
 
         $builder->add(
@@ -108,7 +108,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             ParameterType\Compound\BooleanType::class,
             [
                 'groups' => $advancedGroup,
-            ]
+            ],
         );
 
         $builder->get('use_tags_from_query_string')->add(
@@ -116,7 +116,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             ParameterType\TextLineType::class,
             [
                 'groups' => $advancedGroup,
-            ]
+            ],
         );
 
         $builder->add(
@@ -129,7 +129,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
                     'Match all tags' => 'all',
                 ],
                 'groups' => $advancedGroup,
-            ]
+            ],
         );
 
         $this->buildSortParameters($builder, [], ['date_published', 'date_modified', 'content_name']);
@@ -165,12 +165,12 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $searchResult = $this->searchService->findLocations(
             $locationQuery,
-            ['languages' => $this->configResolver->getParameter('languages')]
+            ['languages' => $this->configResolver->getParameter('languages')],
         );
 
         return array_map(
             static fn (SearchHit $searchHit): ValueObject => $searchHit->valueObject,
-            $searchResult->searchHits
+            $searchResult->searchHits,
         );
     }
 
@@ -193,7 +193,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $searchResult = $this->searchService->findLocations(
             $locationQuery,
-            ['languages' => $this->configResolver->getParameter('languages')]
+            ['languages' => $this->configResolver->getParameter('languages')],
         );
 
         return $searchResult->totalCount ?? 0;
@@ -284,7 +284,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
         $criteria = array_filter(
             $criteria,
-            static fn (?Criterion $criterion): bool => $criterion instanceof Criterion
+            static fn (?Criterion $criterion): bool => $criterion instanceof Criterion,
         );
 
         $locationQuery = new LocationQuery();
@@ -304,7 +304,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
         if ($parameter->isEmpty()) {
             return array_map(
                 static fn (Field $field): string => $field->fieldDefIdentifier,
-                $content->fields
+                $content->fields,
             );
         }
 
@@ -345,7 +345,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
 
         return array_map(
             static fn (Tag $tag): int => (int) $tag->id,
-            $fieldValue->tags
+            $fieldValue->tags,
         );
     }
 }
