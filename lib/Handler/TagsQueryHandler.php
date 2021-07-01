@@ -12,6 +12,7 @@ use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\ValueObject;
+use eZ\Publish\Core\Helper\TranslationHelper;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\SPI\Persistence\Content\ObjectState\Handler as ObjectStateHandler;
 use Netgen\Layouts\API\Values\Collection\Query;
@@ -66,17 +67,24 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     private $requestStack;
 
+    /**
+     * @var \eZ\Publish\Core\Helper\TranslationHelper
+     */
+    private $translationHelper;
+
     public function __construct(
         LocationService $locationService,
         SearchService $searchService,
         ObjectStateHandler $objectStateHandler,
         ContentProviderInterface $contentProvider,
         ConfigResolverInterface $configResolver,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        TranslationHelper $translationHelper
     ) {
         $this->searchService = $searchService;
         $this->configResolver = $configResolver;
         $this->requestStack = $requestStack;
+        $this->translationHelper = $translationHelper;
 
         $this->setLocationService($locationService);
         $this->setObjectStateHandler($objectStateHandler);
@@ -350,9 +358,9 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
      */
     private function getTagsFromField(Content $content, string $fieldDefinitionIdentifier): array
     {
-        $fieldValue = $content->getFieldValue($fieldDefinitionIdentifier);
+        $field = $this->translationHelper->getTranslatedField($content, $fieldDefinitionIdentifier);
 
-        if ($fieldValue === null || !$fieldValue instanceof TagsFieldValue) {
+        if ($field === null || !$field->value instanceof TagsFieldValue) {
             return [];
         }
 
@@ -360,7 +368,7 @@ final class TagsQueryHandler implements QueryTypeHandlerInterface
             static function (Tag $tag): int {
                 return (int) $tag->id;
             },
-            $fieldValue->tags
+            $field->value->tags
         );
     }
 
