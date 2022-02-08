@@ -9,7 +9,3 @@ parameters:
         # eZ Platform
 
         - "#Casting to int something that's already int.#"
-
-        # PHPStan bug
-
-        - '#Function array_merge invoked with 0 parameters, at least 1 required.#'
