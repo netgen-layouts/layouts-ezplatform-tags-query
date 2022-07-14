@@ -29,6 +29,7 @@ use Netgen\TagsBundle\Core\FieldType\Tags\Value as TagsFieldValue;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Kernel;
+
 use function array_filter;
 use function array_map;
 use function array_merge;
