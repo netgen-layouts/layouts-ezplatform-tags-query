@@ -6,6 +6,4 @@ namespace Netgen\Bundle\LayoutsEzPlatformTagsQueryBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-final class NetgenLayoutsEzPlatformTagsQueryBundle extends Bundle
-{
-}
+final class NetgenLayoutsEzPlatformTagsQueryBundle extends Bundle {}
