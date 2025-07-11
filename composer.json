@@ -16,8 +16,7 @@
     "require-dev": {
         "netgen/layouts-coding-standard": "^2.0",
         "phpstan/phpstan": "^1.9",
-        "phpstan/phpstan-strict-rules": "^1.4",
-        "vimeo/psalm": "^4.30 || ^5.4"
+        "phpstan/phpstan-strict-rules": "^1.4"
     },
     "config": {
         "allow-plugins": false
@@ -26,8 +25,7 @@
         "netgen/layouts-tags-query": "*"
     },
     "scripts": {
-        "phpstan": "@php vendor/bin/phpstan analyse -c phpstan.neon --level=8 --ansi lib bundle",
-        "psalm": "@php vendor/bin/psalm -c psalm.xml --show-info=false"
+        "phpstan": "@php vendor/bin/phpstan analyse -c phpstan.neon --level=8 --ansi lib bundle"
     },
     "autoload": {
         "psr-4": {

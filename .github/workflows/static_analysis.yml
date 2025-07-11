@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        script: ['phpstan', 'psalm']
+        script: ['phpstan']
 
     steps:
       - uses: actions/checkout@v3
